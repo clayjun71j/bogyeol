@@ -1,0 +1,1019 @@
+<!DOCTYPE html>
+<html lang="ko"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>형곡초 보결수업 추천 v8</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+
+<!-- Firebase SDK (v10 모듈형 / CDN) -->
+<script type="module">
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+  import { getFirestore, doc, setDoc, onSnapshot } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+
+  // ★ 아래 firebaseConfig 객체 내용을 본인의 Firebase 콘솔 발급 키로 교체하세요!
+ const firebaseConfig = {
+    apiKey: "AIzaSy...",
+    authDomain: "hyeonggok-bogyeol.firebaseapp.com",
+    projectId: "hyeonggok-bogyeol",
+    storageBucket: "hyeonggok-bogyeol.appspot.com",
+    messagingSenderId: "123456789...",
+    appId: "1:123456789...:web:abc123def..."
+  };
+
+  const app = initializeApp(firebaseConfig);
+  const db = getFirestore(app);
+
+  // 전역 객체 등록
+  window.db = db;
+  window.doc = doc;
+  window.setDoc = setDoc;
+  window.onSnapshot = onSnapshot;
+</script>
+
+<style>
+:root{
+  --navy:#18324b; --blue:#2563eb; --blue2:#eaf2ff; --teal:#0f766e;
+  --green:#15803d; --greenbg:#ecfdf3; --amber:#b45309; --amberbg:#fff7e6;
+  --red:#dc2626; --redbg:#fff1f2; --line:#d9e1ea; --soft:#f4f7fb;
+  --text:#172033; --muted:#64748b; --white:#fff;
+}
+*{box-sizing:border-box}
+body{font-family:Pretendard,-apple-system,"Malgun Gothic","Apple SD Gothic Neo",sans-serif;margin:0;background:linear-gradient(180deg,#eef4f9 0,#f7f9fc 180px,#f7f9fc 100%);color:var(--text);font-size:14px;line-height:1.5}
+header{background:linear-gradient(135deg,#18324b,#244d70);color:#fff;border-bottom:0;padding:14px 20px 12px;display:flex;align-items:center;gap:18px;flex-wrap:wrap;box-shadow:0 2px 10px rgba(15,35,55,.16);position:sticky;top:0;z-index:20}
+header h1{font-size:19px;margin:0;font-weight:750;letter-spacing:-.4px;white-space:nowrap} header .tiny{color:#dbe8f4}
+#nav{display:flex;gap:6px;flex-wrap:wrap;margin-left:auto}.tab{border:1px solid rgba(255,255,255,.28);background:rgba(255,255,255,.10);color:#edf5fb;padding:7px 12px;border-radius:8px;cursor:pointer;font-size:13px;font-weight:600;transition:.15s}.tab:hover{background:rgba(255,255,255,.2)}.tab.on{background:#fff;color:#18324b;border-color:#fff;box-shadow:0 2px 6px rgba(0,0,0,.14)}
+#main{padding:18px 20px 32px;max-width:1280px;margin:0 auto}
+h3{font-size:16px;margin:18px 0 9px;color:var(--navy);font-weight:750;letter-spacing:-.2px}h3:first-child{margin-top:0}
+.card{background:rgba(255,255,255,.96);border:1px solid var(--line);border-radius:12px;padding:15px 16px;margin-bottom:12px;box-shadow:0 2px 7px rgba(30,55,80,.06)}
+.grid3{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}.grid3 .card{position:relative;overflow:hidden}.grid3 .card:before{content:"";position:absolute;left:0;top:0;bottom:0;width:4px;background:#60a5fa}.grid3 .card:nth-child(2):before{background:#34d399}.grid3 .card:nth-child(3):before{background:#f59e0b}
+.lbl{font-size:12px;color:var(--muted);font-weight:650}.big{font-size:27px;font-weight:750;margin:2px 0;color:var(--navy)}.sub{font-size:12px;color:var(--muted)}
+.two{display:grid;grid-template-columns:1fr 1fr;gap:16px}@media(max-width:900px){.two,.grid3{grid-template-columns:1fr}header{position:static}#nav{margin-left:0}}
+.card>h3{border-bottom:2px solid #e8eef5;padding-bottom:7px}
+table{border-collapse:separate;border-spacing:0;width:100%;background:#fff;font-size:13px;border:1px solid var(--line);border-radius:9px;overflow:hidden}th,td{border:0;border-bottom:1px solid #e8eef5;padding:7px 8px;text-align:left;vertical-align:middle}tr:last-child td{border-bottom:0}th{background:#edf3f8;color:#29435b;font-weight:700}tbody tr:hover td,table tr:hover td{background:#f8fbff}td.r,th.r{text-align:right}table.small{width:auto;max-width:100%}table.small th,table.small td{padding:7px 9px}table.status td{text-align:center;min-width:86px}td.nm{text-align:left;white-space:nowrap}
+.tiny{font-size:11.5px;color:#6b7c8f}.muted{color:var(--muted)}.warn{color:var(--amber)}.r{text-align:right}
+.st-수업{background:#eef1f4!important}.st-점심{background:#fff5d9!important}.st-공강{background:#eaf9ef!important}.st-종료{background:#eaf2ff!important}
+.legend i{display:inline-block;width:12px;height:12px;border:1px solid #cbd5e1;margin:0 4px 0 10px;vertical-align:middle;border-radius:3px}
+.warnbox{background:var(--amberbg);border:1px solid #f4c36a;border-left:5px solid #f59e0b;border-radius:9px;padding:9px 13px;margin:10px 0}.warnbox ul{margin:4px 0 0 16px;padding:0}.okbox{background:var(--greenbg);border:1px solid #9de0b5;border-left:5px solid #22c55e;border-radius:9px;padding:9px 13px;margin:10px 0}
+.warnlist{max-height:220px;overflow:auto;margin:0;padding-left:18px}
+input,select,textarea{font:inherit;padding:6px 8px;border:1px solid #cbd5e1;border-radius:7px;background:#fff;color:var(--text);outline:none;transition:border-color .12s,box-shadow .12s}input:focus,select:focus,textarea:focus{border-color:#60a5fa;box-shadow:0 0 0 3px rgba(37,99,235,.10)}input.num{width:68px;text-align:right}input.num.w{width:92px}input.tm{width:70px}textarea{width:100%}
+button{font:inherit;padding:7px 12px;border:1px solid #cbd5e1;border-radius:7px;background:#fff;color:var(--text);cursor:pointer;transition:.12s;box-shadow:0 1px 2px rgba(15,35,55,.04)}button:hover{background:#f8fafc;border-color:#94a3b8}button.primary{background:var(--blue);color:#fff;border-color:var(--blue);font-weight:650;box-shadow:0 2px 5px rgba(37,99,235,.2)}button.primary:hover{background:#1d4ed8}button.sm{padding:3px 9px;font-size:12px}button.danger{border-color:#f0a0a8;color:var(--red);background:#fff8f8}button.danger:hover{background:var(--redbg);border-color:#ef4444}button:disabled{opacity:.5;cursor:default}
+label.btn{display:inline-block;padding:7px 12px;border:1px solid #cbd5e1;border-radius:7px;cursor:pointer;background:#fff}.row{display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin:7px 0}.form label{display:inline-flex;gap:6px;align-items:center}.chk{display:inline-flex;align-items:center;gap:5px;margin:4px 0 4px 0;background:#f8fafc;border:1px solid #e2e8f0;border-radius:7px;padding:6px 9px}.chk:hover{background:#f1f5f9}
+.ritem{border-top:1px solid #e5eaf0;padding:11px 0}.rh{margin-bottom:6px;font-size:14px;font-weight:700;color:var(--navy)}.cand{display:block;padding:8px 10px;border:1px solid #dbe3ec;border-radius:8px;margin:5px 0;cursor:pointer;background:#fff;transition:.12s}.cand:hover{border-color:#93c5fd;background:#f8fbff}.cand.swap{background:#eef5ff;border-color:#bfdbfe}.reasons{margin-left:22px}.scroll{overflow:auto}input.cell{width:74px;text-align:center}.steps li{margin:4px 0}
+#main table.small tr:has(button.danger) td:first-child{background:#f8fafc;font-weight:600;color:#334155}
+#main table.small tr:has(button.danger) td:nth-child(2){background:#fbfdff}
+#main table.small tr:has(button.danger) input[type=number]{font-weight:750;color:var(--navy);background:#fff}
+#main table.small tr:has(button.danger) button.danger{min-width:46px}
+a{color:#1d4ed8;text-decoration:none;font-weight:600}a:hover{text-decoration:underline}
+</style></head>
+<body>
+<header><h1>형곡초등학교 보결수업 추천</h1><span class="tiny">2026학년도 보결수업 규정 반영 · 학년별 시정표(1·2·6 / 3·4·5) 적용</span><nav id="nav"></nav></header>
+<div id="main"></div>
+<script>
+const PRELOAD = {"jdTeachers": [{"name": "전호영", "label": "과학(5)", "hours": "", "subjects": [{"subject": "과학", "grades": [5]}]}, {"name": "김인화", "label": "과학(3,4,6)", "hours": "", "subjects": [{"subject": "과학", "grades": [3, 4, 6]}]}, {"name": "이윤정", "label": "체육(3, 5)", "hours": "", "subjects": [{"subject": "체육", "grades": [3, 5]}]}, {"name": "이은진", "label": "체육(4, 6)", "hours": "", "subjects": [{"subject": "체육", "grades": [4, 6]}]}, {"name": "한동형", "label": "즐생(1~2) 영어(3~5)", "hours": "", "subjects": [{"subject": "즐생", "grades": [1, 2]}, {"subject": "영어", "grades": [3, 4, 5]}]}, {"name": "이현경", "label": "기초(1, 2)", "hours": "", "subjects": [{"subject": "기초", "grades": [1, 2]}]}, {"name": "한결이", "label": "영어(5, 6)", "hours": "", "subjects": [{"subject": "영어", "grades": [5, 6]}]}], "lessons": [{"teacher": "전호영", "day": 1, "period": 1, "grade": 5, "cls": 2, "subject": "과학"}, {"teacher": "전호영", "day": 3, "period": 1, "grade": 5, "cls": 3, "subject": "과학"}, {"teacher": "전호영", "day": 4, "period": 1, "grade": 5, "cls": 2, "subject": "과학"}, {"teacher": "전호영", "day": 1, "period": 2, "grade": 5, "cls": 1, "subject": "과학"}, {"teacher": "전호영", "day": 3, "period": 2, "grade": 5, "cls": 1, "subject": "과학"}, {"teacher": "전호영", "day": 4, "period": 2, "grade": 5, "cls": 3, "subject": "과학"}, {"teacher": "전호영", "day": 1, "period": 3, "grade": 5, "cls": 3, "subject": "과학"}, {"teacher": "전호영", "day": 3, "period": 3, "grade": 5, "cls": 4, "subject": "과학"}, {"teacher": "전호영", "day": 4, "period": 3, "grade": 5, "cls": 1, "subject": "과학"}, {"teacher": "전호영", "day": 1, "period": 4, "grade": 5, "cls": 4, "subject": "과학"}, {"teacher": "전호영", "day": 3, "period": 4, "grade": 5, "cls": 2, "subject": "과학"}, {"teacher": "전호영", "day": 4, "period": 4, "grade": 5, "cls": 4, "subject": "과학"}, {"teacher": "김인화", "day": 1, "period": 1, "grade": 6, "cls": 1, "subject": "과학"}, {"teacher": "김인화", "day": 3, "period": 1, "grade": 6, "cls": 2, "subject": "과학"}, {"teacher": "김인화", "day": 4, "period": 1, "grade": 6, "cls": 4, "subject": "과학"}, {"teacher": "김인화", "day": 0, "period": 2, "grade": 4, "cls": 1, "subject": "과학"}, {"teacher": "김인화", "day": 1, "period": 2, "grade": 6, "cls": 2, "subject": "과학"}, {"teacher": "김인화", "day": 2, "period": 2, "grade": 3, "cls": 1, "subject": "과학"}, {"teacher": "김인화", "day": 3, "period": 2, "grade": 6, "cls": 3, "subject": "과학"}, {"teacher": "김인화", "day": 4, "period": 2, "grade": 6, "cls": 1, "subject": "과학"}, {"teacher": "김인화", "day": 0, "period": 3, "grade": 4, "cls": 2, "subject": "과학"}, {"teacher": "김인화", "day": 1, "period": 3, "grade": 6, "cls": 3, "subject": "과학"}, {"teacher": "김인화", "day": 2, "period": 3, "grade": 3, "cls": 2, "subject": "과학"}, {"teacher": "김인화", "day": 3, "period": 3, "grade": 6, "cls": 4, "subject": "과학"}, {"teacher": "김인화", "day": 4, "period": 3, "grade": 6, "cls": 2, "subject": "과학"}, {"teacher": "김인화", "day": 0, "period": 4, "grade": 4, "cls": 3, "subject": "과학"}, {"teacher": "김인화", "day": 1, "period": 4, "grade": 6, "cls": 4, "subject": "과학"}, {"teacher": "김인화", "day": 2, "period": 4, "grade": 3, "cls": 3, "subject": "과학"}, {"teacher": "김인화", "day": 3, "period": 4, "grade": 6, "cls": 1, "subject": "과학"}, {"teacher": "김인화", "day": 4, "period": 4, "grade": 6, "cls": 3, "subject": "과학"}, {"teacher": "이윤정", "day": 0, "period": 1, "grade": 5, "cls": 3, "subject": "체육"}, {"teacher": "이윤정", "day": 2, "period": 1, "grade": 5, "cls": 2, "subject": "체육"}, {"teacher": "이윤정", "day": 0, "period": 2, "grade": 5, "cls": 4, "subject": "체육"}, {"teacher": "이윤정", "day": 1, "period": 2, "grade": 3, "cls": 2, "subject": "체육"}, {"teacher": "이윤정", "day": 2, "period": 2, "grade": 5, "cls": 3, "subject": "체육"}, {"teacher": "이윤정", "day": 3, "period": 2, "grade": 3, "cls": 3, "subject": "체육"}, {"teacher": "이윤정", "day": 4, "period": 2, "grade": 3, "cls": 1, "subject": "체육"}, {"teacher": "이윤정", "day": 0, "period": 3, "grade": 5, "cls": 1, "subject": "체육"}, {"teacher": "이윤정", "day": 1, "period": 3, "grade": 3, "cls": 3, "subject": "체육"}, {"teacher": "이윤정", "day": 2, "period": 3, "grade": 5, "cls": 4, "subject": "체육"}, {"teacher": "이윤정", "day": 3, "period": 3, "grade": 3, "cls": 1, "subject": "체육"}, {"teacher": "이윤정", "day": 4, "period": 3, "grade": 3, "cls": 2, "subject": "체육"}, {"teacher": "이윤정", "day": 0, "period": 4, "grade": 5, "cls": 2, "subject": "체육"}, {"teacher": "이윤정", "day": 1, "period": 4, "grade": 3, "cls": 1, "subject": "체육"}, {"teacher": "이윤정", "day": 2, "period": 4, "grade": 5, "cls": 1, "subject": "체육"}, {"teacher": "이윤정", "day": 3, "period": 4, "grade": 3, "cls": 2, "subject": "체육"}, {"teacher": "이윤정", "day": 4, "period": 4, "grade": 3, "cls": 3, "subject": "체육"}, {"teacher": "이은진", "day": 0, "period": 1, "grade": 6, "cls": 1, "subject": "체육"}, {"teacher": "이은진", "day": 1, "period": 1, "grade": 6, "cls": 3, "subject": "체육"}, {"teacher": "이은진", "day": 2, "period": 1, "grade": 4, "cls": 1, "subject": "체육"}, {"teacher": "이은진", "day": 4, "period": 1, "grade": 4, "cls": 3, "subject": "체육"}, {"teacher": "이은진", "day": 0, "period": 2, "grade": 6, "cls": 2, "subject": "체육"}, {"teacher": "이은진", "day": 1, "period": 2, "grade": 6, "cls": 4, "subject": "체육"}, {"teacher": "이은진", "day": 2, "period": 2, "grade": 4, "cls": 2, "subject": "체육"}, {"teacher": "이은진", "day": 3, "period": 2, "grade": 4, "cls": 3, "subject": "체육"}, {"teacher": "이은진", "day": 4, "period": 2, "grade": 4, "cls": 1, "subject": "체육"}, {"teacher": "이은진", "day": 0, "period": 3, "grade": 6, "cls": 3, "subject": "체육"}, {"teacher": "이은진", "day": 1, "period": 3, "grade": 6, "cls": 1, "subject": "체육"}, {"teacher": "이은진", "day": 3, "period": 3, "grade": 4, "cls": 1, "subject": "체육"}, {"teacher": "이은진", "day": 4, "period": 3, "grade": 4, "cls": 2, "subject": "체육"}, {"teacher": "이은진", "day": 0, "period": 4, "grade": 6, "cls": 4, "subject": "체육"}, {"teacher": "이은진", "day": 1, "period": 4, "grade": 6, "cls": 2, "subject": "체육"}, {"teacher": "이은진", "day": 2, "period": 4, "grade": 4, "cls": 3, "subject": "체육"}, {"teacher": "이은진", "day": 3, "period": 4, "grade": 4, "cls": 2, "subject": "체육"}, {"teacher": "한동형", "day": 0, "period": 1, "grade": 3, "cls": 2, "subject": "영어"}, {"teacher": "한동형", "day": 1, "period": 1, "grade": 5, "cls": 4, "subject": "영어"}, {"teacher": "한동형", "day": 2, "period": 1, "grade": 5, "cls": 4, "subject": "영어"}, {"teacher": "한동형", "day": 3, "period": 1, "grade": 3, "cls": 1, "subject": "영어"}, {"teacher": "한동형", "day": 4, "period": 1, "grade": 2, "cls": 2, "subject": "즐생"}, {"teacher": "한동형", "day": 0, "period": 2, "grade": 3, "cls": 3, "subject": "영어"}, {"teacher": "한동형", "day": 1, "period": 2, "grade": 4, "cls": 1, "subject": "영어"}, {"teacher": "한동형", "day": 2, "period": 2, "grade": 4, "cls": 3, "subject": "영어"}, {"teacher": "한동형", "day": 3, "period": 2, "grade": 3, "cls": 2, "subject": "영어"}, {"teacher": "한동형", "day": 4, "period": 2, "grade": 2, "cls": 1, "subject": "즐생"}, {"teacher": "한동형", "day": 0, "period": 3, "grade": 3, "cls": 1, "subject": "영어"}, {"teacher": "한동형", "day": 1, "period": 3, "grade": 4, "cls": 2, "subject": "영어"}, {"teacher": "한동형", "day": 2, "period": 3, "grade": 4, "cls": 1, "subject": "영어"}, {"teacher": "한동형", "day": 4, "period": 3, "grade": 1, "cls": 2, "subject": "즐생"}, {"teacher": "한동형", "day": 0, "period": 4, "grade": 5, "cls": 4, "subject": "영어"}, {"teacher": "한동형", "day": 1, "period": 4, "grade": 4, "cls": 3, "subject": "영어"}, {"teacher": "한동형", "day": 2, "period": 4, "grade": 4, "cls": 2, "subject": "영어"}, {"teacher": "한동형", "day": 3, "period": 4, "grade": 3, "cls": 3, "subject": "영어"}, {"teacher": "한동형", "day": 4, "period": 4, "grade": 1, "cls": 1, "subject": "즐생"}, {"teacher": "이현경", "day": 0, "period": 1, "grade": 1, "cls": 1, "subject": "기초"}, {"teacher": "이현경", "day": 1, "period": 1, "grade": 1, "cls": 1, "subject": "기초"}, {"teacher": "이현경", "day": 2, "period": 1, "grade": 1, "cls": 2, "subject": "기초"}, {"teacher": "이현경", "day": 3, "period": 1, "grade": 1, "cls": 2, "subject": "기초"}, {"teacher": "이현경", "day": 0, "period": 2, "grade": 1, "cls": 2, "subject": "기초"}, {"teacher": "이현경", "day": 1, "period": 2, "grade": 1, "cls": 2, "subject": "기초"}, {"teacher": "이현경", "day": 2, "period": 2, "grade": 1, "cls": 1, "subject": "기초"}, {"teacher": "이현경", "day": 3, "period": 2, "grade": 1, "cls": 1, "subject": "기초"}, {"teacher": "이현경", "day": 0, "period": 3, "grade": 2, "cls": 1, "subject": "기초"}, {"teacher": "이현경", "day": 1, "period": 3, "grade": 2, "cls": 1, "subject": "기초"}, {"teacher": "이현경", "day": 2, "period": 3, "grade": 2, "cls": 2, "subject": "기초"}, {"teacher": "이현경", "day": 3, "period": 3, "grade": 2, "cls": 2, "subject": "기초"}, {"teacher": "이현경", "day": 0, "period": 4, "grade": 2, "cls": 2, "subject": "기초"}, {"teacher": "이현경", "day": 1, "period": 4, "grade": 2, "cls": 2, "subject": "기초"}, {"teacher": "이현경", "day": 2, "period": 4, "grade": 2, "cls": 1, "subject": "기초"}, {"teacher": "이현경", "day": 3, "period": 4, "grade": 2, "cls": 1, "subject": "기초"}, {"teacher": "한결이", "day": 0, "period": 1, "grade": 6, "cls": 3, "subject": "영어"}, {"teacher": "한결이", "day": 2, "period": 1, "grade": 6, "cls": 2, "subject": "영어"}, {"teacher": "한결이", "day": 3, "period": 1, "grade": 6, "cls": 4, "subject": "영어"}, {"teacher": "한결이", "day": 0, "period": 2, "grade": 6, "cls": 4, "subject": "영어"}, {"teacher": "한결이", "day": 2, "period": 2, "grade": 6, "cls": 3, "subject": "영어"}, {"teacher": "한결이", "day": 3, "period": 2, "grade": 6, "cls": 1, "subject": "영어"}, {"teacher": "한결이", "day": 4, "period": 2, "grade": 5, "cls": 1, "subject": "영어"}, {"teacher": "한결이", "day": 0, "period": 3, "grade": 6, "cls": 1, "subject": "영어"}, {"teacher": "한결이", "day": 1, "period": 3, "grade": 5, "cls": 1, "subject": "영어"}, {"teacher": "한결이", "day": 2, "period": 3, "grade": 6, "cls": 4, "subject": "영어"}, {"teacher": "한결이", "day": 3, "period": 3, "grade": 6, "cls": 2, "subject": "영어"}, {"teacher": "한결이", "day": 4, "period": 3, "grade": 5, "cls": 2, "subject": "영어"}, {"teacher": "한결이", "day": 0, "period": 4, "grade": 6, "cls": 2, "subject": "영어"}, {"teacher": "한결이", "day": 1, "period": 4, "grade": 5, "cls": 2, "subject": "영어"}, {"teacher": "한결이", "day": 2, "period": 4, "grade": 6, "cls": 1, "subject": "영어"}, {"teacher": "한결이", "day": 3, "period": 4, "grade": 6, "cls": 3, "subject": "영어"}, {"teacher": "한결이", "day": 4, "period": 4, "grade": 5, "cls": 3, "subject": "영어"}, {"teacher": "한결이", "day": 0, "period": 5, "grade": 5, "cls": 3, "subject": "영어"}, {"teacher": "한결이", "day": 1, "period": 5, "grade": 5, "cls": 3, "subject": "영어"}, {"teacher": "한결이", "day": 2, "period": 5, "grade": 5, "cls": 1, "subject": "영어"}, {"teacher": "한결이", "day": 3, "period": 5, "grade": 5, "cls": 2, "subject": "영어"}], "classes": ["1-1", "1-2", "2-1", "2-2", "3-1", "3-2", "3-3", "4-1", "4-2", "4-3", "5-1", "5-2", "5-3", "5-4", "6-1", "6-2", "6-3", "6-4"], "classNotes": {}, "classNames": {"1-1": "정민화", "1-2": "김다빈", "2-1": "박미영", "2-2": "연수진", "3-1": "김중형", "3-2": "신수민", "3-3": "조혜란", "4-1": "오안나", "4-2": "김민이", "4-3": "신하나", "5-1": "조현우", "5-2": "김예현", "5-3": "이현", "5-4": "최슬아", "6-1": "최서영", "6-2": "김윤환", "6-3": "신건희", "6-4": "이준상"}, "warns": []};
+
+// ===== CORE =====
+const DAYS = ["월","화","수","목","금"];
+const DEFAULT_TT = {
+  blocks: [
+    {id:"A", start:"09:00", end:"09:40"},
+    {id:"B", start:"09:50", end:"10:30"},
+    {id:"C", start:"10:40", end:"11:20"},
+    {id:"D", start:"11:30", end:"12:10"},
+    {id:"E", start:"12:20", end:"13:00"},
+    {id:"F", start:"13:00", end:"13:50"},
+    {id:"G", start:"13:50", end:"14:30"}
+  ],
+  group1Grades: [1,2,6],
+  maxPeriods: {1:[5,5,4,5,4], 2:[5,5,4,5,4], 3:[5,5,5,6,5], 4:[5,5,5,6,5], 5:[6,6,5,6,6], 6:[6,6,5,6,6]}
+};
+const DEFAULT_SETTINGS = {
+  maxPerDay: 2,
+  allowAdmin: false,
+  lunchSupervisor: false,
+  wagePerHour: 15000,
+  semesterStart: {1:"2026-03-01", 2:"2026-09-01"},
+  w: {
+    amSameGradeJd: 40, amSameGradeHomeroom: 30, amOtherJd: 20, amOtherHomeroom: 10,
+    pmEnded: 40, pmJd: 25, pmHomeroomFree: 15, pmSameGradeBonus: 5,
+    nonHomeroom: 5, adminPenalty: -50,
+    perCount: -3, perCountCap: 20,
+    overloadThreshold: 8, overloadPenalty: -20,
+    adjacentBusyPenalty: -3
+  }
+};
+
+const WEIGHT_DEFS = [
+  {key:"amSameGradeJd", label:"1~4교시: 동학년 전담", type:"score"},
+  {key:"amSameGradeHomeroom", label:"1~4교시: 동학년 담임 공강", type:"score"},
+  {key:"amOtherJd", label:"1~4교시: 타학년 전담", type:"score"},
+  {key:"amOtherHomeroom", label:"1~4교시: 타학년 담임", type:"score"},
+  {key:"pmEnded", label:"5~6교시: 수업 끝난 학년 담임", type:"score"},
+  {key:"pmJd", label:"5~6교시: 전담 공강", type:"score"},
+  {key:"pmHomeroomFree", label:"5~6교시: 담임 공강", type:"score"},
+  {key:"pmSameGradeBonus", label:"5~6교시: 동학년 가산", type:"score"},
+  {key:"nonHomeroom", label:"비담임 가산", type:"score"},
+  {key:"adminPenalty", label:"관리자 감점", type:"score"},
+  {key:"perCount", label:"학기 누적 1회당", type:"score"},
+  {key:"perCountCap", label:"누적 감점 상한", type:"cap"},
+  {key:"overloadThreshold", label:"전담·비담임 월 과다 기준(회)", type:"threshold"},
+  {key:"overloadPenalty", label:"월 과다 감점", type:"score"},
+  {key:"adjacentBusyPenalty", label:"앞뒤 교시 연속 수업 감점", type:"score"}
+];
+
+function ensureWeightItems(){
+  const s=state.settings || (state.settings=deepClone(DEFAULT_SETTINGS));
+  if(!Array.isArray(s.weightItems)){
+    s.weightItems=WEIGHT_DEFS.map(d=>({key:d.key,label:d.label,value:Number(s.w&&s.w[d.key]!==undefined?s.w[d.key]:DEFAULT_SETTINGS.w[d.key])}));
+  } else {
+    s.weightItems=s.weightItems.filter(x=>x&&WEIGHT_DEFS.some(d=>d.key===x.key)).map(x=>{
+      const d=WEIGHT_DEFS.find(d=>d.key===x.key);
+      return {key:d.key,label:x.label||d.label,value:Number(x.value??0)};
+    });
+  }
+  s.w=s.w||{};
+  s.weightItems.forEach(x=>s.w[x.key]=Number(x.value));
+}
+function weightValue(state,key){
+  ensureWeightItems();
+  const x=state.settings.weightItems.find(x=>x.key===key);
+  return x ? Number(x.value)||0 : 0;
+}
+
+function groupOf(tt, grade){ return tt.group1Grades.indexOf(Number(grade))>=0 ? 1 : 2; }
+function lunchBlockIdx(group){ return group===1 ? 4 : 5; }
+function periodToBlockIdx(tt, grade, p){
+  p = Number(p);
+  if (p>=1 && p<=4) return p-1;
+  if (p===5) return groupOf(tt, grade)===1 ? 5 : 4;
+  if (p===6) return 6;
+  return null;
+}
+function blockIdxToPeriod(tt, grade, bi){
+  if (bi<=3) return bi+1;
+  const g = groupOf(tt, grade);
+  if (bi===4) return g===1 ? null : 5;
+  if (bi===5) return g===1 ? 5 : null;
+  if (bi===6) return 6;
+  return null;
+}
+function blockLabel(tt, bi){ const b=tt.blocks[bi]; return b.start+"~"+b.end; }
+function maxPeriodOf(tt, grade, day){ const arr = tt.maxPeriods[grade]; return arr ? arr[day] : 6; }
+
+// ----- 파서 -----
+function cellStr(v){ return (v===null||v===undefined) ? "" : String(v).trim(); }
+function parseGradeList(txt){
+  const gs = new Set();
+  txt.split(/[,\s]+/).forEach(part=>{
+    if(!part) return;
+    const m = part.match(/^(\d)\s*[~\-]\s*(\d)$/);
+    if(m){ for(let g=Number(m[1]); g<=Number(m[2]); g++) gs.add(g); }
+    else if(/^\d$/.test(part)) gs.add(Number(part));
+  });
+  return Array.from(gs);
+}
+function parseJdSheet(rows){
+  rows = rows.map(r=>r.map(cellStr));
+  const teachers=[], lessons=[], warns=[];
+  let i=0;
+  while(i<rows.length){
+    const row=rows[i];
+    if(row.indexOf("요일")>=0){
+      const title = i>0 ? rows[i-1] : [];
+      const subjCell = title[0]||"";
+      const nameCell = title.slice(1).find(c=>c) || "";
+      let name = nameCell;
+      const m = nameCell.match(/^(.*?)\(/);
+      if(m && m[1].trim()){ const toks=m[1].trim().split(/\s+/); name = toks[toks.length-1]; }
+      else { name = nameCell.split("/")[0].trim(); }
+      const hm = nameCell.match(/\(([^)]*)\)/);
+      const subjmap=[];
+      const re=/([가-힣A-Za-z]+)\s*\(([^)]*)\)/g; let mm;
+      while((mm=re.exec(subjCell))!==null){ subjmap.push({subject:mm[1], grades:parseGradeList(mm[2])}); }
+      if(subjmap.length===0 && subjCell) subjmap.push({subject:subjCell, grades:[]});
+      if(!name){ warns.push((i+1)+"행: 교사명을 찾지 못했습니다 ('"+subjCell+"')"); }
+      const dayCols={};
+      row.forEach((c,j)=>{ if(DAYS.indexOf(c)>=0) dayCols[j]=DAYS.indexOf(c); });
+      teachers.push({name:name, label:subjCell, hours: hm?hm[1]:"", subjects:subjmap});
+      let k=i+1;
+      while(k<rows.length){
+        const r=rows[k];
+        if(r[0]==="교시"){ k++; continue; }
+        if(/^\d$/.test(r[0]||"")){
+          const p=Number(r[0]);
+          Object.keys(dayCols).forEach(j=>{
+            const v=r[Number(j)]||""; if(!v) return;
+            v.split("/").forEach(tok=>{
+              const cm=tok.trim().match(/^(\d)\s*-\s*(\d+)/);
+              if(!cm){ warns.push(name+" "+DAYS[dayCols[j]]+p+"교시: '"+tok+"' 해석 불가"); return; }
+              const g=Number(cm[1]), c=Number(cm[2]);
+              const found = subjmap.find(s=>s.grades.indexOf(g)>=0);
+              const subject = found ? found.subject : (subjmap[0]?subjmap[0].subject:subjCell);
+              lessons.push({teacher:name, day:dayCols[j], period:p, grade:g, cls:c, subject:subject});
+            });
+          });
+          k++;
+        } else break;
+      }
+      i=k;
+    } else i++;
+  }
+  return {teachers, lessons, warns};
+}
+function parseClsSheet(rows){
+  rows = rows.map(r=>r.map(cellStr));
+  const classes=[], notes={}, slots=[], names={};
+  let i=0;
+  while(i<rows.length){
+    const row=rows[i];
+    if(/^\d-\d+$/.test(row[0]||"")){
+      const cname=row[0]; classes.push(cname); if(row[1] && !/학기/.test(row[1])) names[cname]=row[1];
+      row.slice(1).forEach(c=>{
+        const nm=c.match(/([가-힣]+)\s*(\d)학기\s*담임/);
+        if(nm){ (notes[cname]=notes[cname]||[]).push({subject:nm[1], semester:Number(nm[2])}); }
+      });
+      let k=i+1, dayCols={};
+      while(k<rows.length){
+        const r=rows[k];
+        if(r.indexOf("요일")>=0){ dayCols={}; r.forEach((c,j)=>{ if(DAYS.indexOf(c)>=0) dayCols[j]=DAYS.indexOf(c); }); k++; continue; }
+        if(r[0]==="교시"){ k++; continue; }
+        if(/^\d$/.test(r[0]||"")){
+          const p=Number(r[0]);
+          Object.keys(dayCols).forEach(j=>{ const v=r[Number(j)]||""; if(v) slots.push({cls:cname, day:dayCols[j], period:p, subject:v}); });
+          k++;
+        } else if(r.every(c=>!c)){ k++; }
+        else break;
+      }
+      i=k;
+    } else i++;
+  }
+  return {classes, notes, slots, names};
+}
+function crossCheck(jd, cl){
+  const warns=[];
+  const lk={}; jd.lessons.forEach(l=>{ lk[l.grade+"-"+l.cls+"|"+l.day+"|"+l.period]=l; });
+  const sk={}; cl.slots.forEach(s=>{ sk[s.cls+"|"+s.day+"|"+s.period]=s; });
+  Object.keys(sk).forEach(k=>{ if(!lk[k]){ const s=sk[k]; warns.push("담임 시트에만 있음: "+s.cls+" "+DAYS[s.day]+" "+s.period+"교시 "+s.subject+" (전담 시트에 해당 수업 없음)"); }});
+  Object.keys(lk).forEach(k=>{ if(!sk[k]){ const l=lk[k]; warns.push("전담 시트에만 있음: "+l.grade+"-"+l.cls+" "+DAYS[l.day]+" "+l.period+"교시 "+l.subject+"("+l.teacher+") (담임 시트에 없음)"); }});
+  const clsSet = new Set(cl.classes);
+  const unknown = new Set();
+  jd.lessons.forEach(l=>{ const c=l.grade+"-"+l.cls; if(cl.classes.length && !clsSet.has(c)) unknown.add(c+" ("+l.teacher+" "+DAYS[l.day]+" "+l.period+"교시)"); });
+  unknown.forEach(u=>warns.push("담임 시트에 없는 학급: "+u+" — 오타 가능성"));
+  return warns;
+}
+function detectSheets(wbSheets){
+  let jd = wbSheets.find(s=>/전담/.test(s.name));
+  let cl = wbSheets.find(s=>/(담임|학급)/.test(s.name) && s!==jd);
+  if(!jd && wbSheets.length>=1) jd = wbSheets[0];
+  if(!cl && wbSheets.length>=2) cl = wbSheets.find(s=>s!==jd);
+  return {jd, cl};
+}
+function buildImport(jdRows, clRows){
+  const jd = parseJdSheet(jdRows);
+  const cl = clRows ? parseClsSheet(clRows) : {classes:[], notes:{}, slots:[]};
+  let classes = cl.classes.slice();
+  if(classes.length===0){
+    const s=new Set(); jd.lessons.forEach(l=>s.add(l.grade+"-"+l.cls));
+    classes = Array.from(s);
+  }
+  classes.sort((a,b)=>{ const [ag,ac]=a.split("-").map(Number), [bg,bc]=b.split("-").map(Number); return ag-bg || ac-bc; });
+  const warns = jd.warns.concat(clRows ? crossCheck(jd, cl) : []);
+  return {jdTeachers: jd.teachers, lessons: jd.lessons, classes, classNotes: cl.notes, classNames: cl.names||{}, warns};
+}
+
+// ----- 상태 계산 -----
+function lessonActive(state, l){
+  const notes = state.classNotes[l.grade+"-"+l.cls] || [];
+  return !notes.some(n=> l.subject.indexOf(n.subject)===0 && n.semester===Number(state.semester));
+}
+function activeLessons(state){ return state.lessons.filter(l=>lessonActive(state,l)); }
+
+function statusOf(state, t, day, bi){
+  const tt = state.tt;
+  const act = state._act || (state._act = activeLessons(state));
+  if(t.role==="담임"){
+    const g=Number(t.grade), c=Number(t.cls);
+    if(bi===lunchBlockIdx(groupOf(tt,g))) return {code:"점심", detail:"급식지도"};
+    const p=blockIdxToPeriod(tt, g, bi);
+    if(p===null) return {code:"점심", detail:""};
+    if(p>maxPeriodOf(tt,g,day)) return {code:"종료", detail:"일과 종료"};
+    const l = act.find(x=>x.day===day && x.period===p && x.grade===g && x.cls===c);
+    if(l) return {code:"공강", detail:l.subject+"("+l.teacher+") 전담수업", period:p};
+    return {code:"수업", detail:g+"-"+c+" 담임수업", period:p};
+  }
+  if(t.lunchGroup && bi===lunchBlockIdx(Number(t.lunchGroup))) return {code:"점심", detail:"점심"};
+  const mine = act.filter(x=>x.teacher===t.name && x.day===day && periodToBlockIdx(tt,x.grade,x.period)===bi);
+  if(mine.length) return {code:"수업", detail: mine.map(x=>x.grade+"-"+x.cls).join("/")+" "+mine[0].subject};
+  return {code:"공강", detail: t.role==="전담" ? "전담 공강" : (t.role==="관리자"?"관리자":"비담임")};
+}
+
+function findTeacherByClass(state, g, c){ return state.teachers.find(t=>t.role==="담임" && Number(t.grade)===Number(g) && Number(t.cls)===Number(c)); }
+
+function countStats(state, teacherName, dateStr){
+  const semStart = state.settings.semesterStart[state.semester] || "2000-01-01";
+  const month = dateStr.slice(0,7);
+  let sem=0, mon=0, last=null, dayCnt=0;
+  state.history.forEach(h=>{
+    if(h.subId!==teacherName || h.type==="교체") return;
+    if(h.date>=semStart) sem++;
+    if(h.date.slice(0,7)===month) mon++;
+    if(h.date===dateStr) dayCnt++;
+    if(!last || h.date>last) last=h.date;
+  });
+  const t = state.teachers.find(x=>x.id===teacherName);
+  sem += (t && t.adjust) ? Number(t.adjust) : 0;
+  return {sem, mon, last, dayCnt};
+}
+
+function rankCandidates(state, ctx){
+  const w = state.settings.w, tt=state.tt;
+  ensureWeightItems();
+  const out=[];
+  state.teachers.forEach(t=>{
+    if(t.id===ctx.absent.id) return;
+    if(t.excluded) return;
+    if(t.role==="관리자" && !state.settings.allowAdmin) return;
+    const st = statusOf(state, t, ctx.day, ctx.bi);
+    if(st.code!=="공강" && st.code!=="종료") return;
+    const stats = countStats(state, t.id, ctx.dateStr);
+    const tent = ctx.tentative[t.id]||0;
+    if(stats.dayCnt + tent >= state.settings.maxPerDay) return;
+    let score=0; const reasons=[];
+    const sameGrade = t.role==="담임" && Number(t.grade)===Number(ctx.grade);
+    const isPm = ctx.period>=5;
+    if(ctx.homeroomFirst && t.role==="담임" && Number(t.grade)===Number(ctx.grade) && Number(t.cls)===Number(ctx.cls)){
+      score+=50; reasons.push("해당 학급 담임(규정 4-나-2)");
+    }
+    if(!isPm){
+      if(t.role==="전담" && teachesGrade(state,t,ctx.grade)){ score+=weightValue(state,"amSameGradeJd"); reasons.push("동학년 전담"); }
+      else if(sameGrade){ score+=weightValue(state,"amSameGradeHomeroom"); reasons.push("동학년 담임 공강"); }
+      else if(t.role==="전담"){ score+=weightValue(state,"amOtherJd"); reasons.push("타학년 전담"); }
+      else if(t.role==="담임"){ score+=weightValue(state,"amOtherHomeroom"); reasons.push(st.code==="종료"?"타학년 담임(일과 종료)":"타학년 담임 공강"); }
+    } else {
+      if(t.role==="담임" && st.code==="종료"){ score+=weightValue(state,"pmEnded"); reasons.push("수업 끝난 학년 담임(기준표 5-6교시)"); }
+      else if(t.role==="전담"){ score+=weightValue(state,"pmJd"); reasons.push("전담 공강"); }
+      else if(t.role==="담임"){ score+=weightValue(state,"pmHomeroomFree"); reasons.push("담임 공강"); }
+      if(sameGrade){ score+=weightValue(state,"pmSameGradeBonus"); reasons.push("동학년"); }
+    }
+    if(t.role==="비담임"){ score+=weightValue(state,"nonHomeroom"); reasons.push("비담임"); }
+    if(t.role==="관리자"){ score+=weightValue(state,"adminPenalty"); reasons.push("관리자(필요 시)"); }
+    const fair = Math.max(-weightValue(state,"perCountCap"), weightValue(state,"perCount")*(stats.sem+tent));
+    score+=fair; reasons.push("학기 누적 "+(stats.sem+tent)+"회");
+    if((t.role==="전담"||t.role==="비담임") && stats.mon+tent>=weightValue(state,"overloadThreshold")){ score+=weightValue(state,"overloadPenalty"); reasons.push("이달 "+stats.mon+"회, 부담 과다(규정 3-나)"); }
+    let adj=0;
+    [ctx.bi-1, ctx.bi+1].forEach(b=>{ if(b>=0 && b<tt.blocks.length){ const s2=statusOf(state,t,ctx.day,b); if(s2.code==="수업") adj++; }});
+    if(adj===2){ score+=weightValue(state,"adjacentBusyPenalty"); reasons.push("앞뒤 교시 연속 수업"); }
+    out.push({teacher:t, score, reasons, status:st, stats});
+  });
+  out.sort((a,b)=> b.score-a.score || a.stats.sem-b.stats.sem || ((a.stats.last||"")<(b.stats.last||"") ? -1 : 1));
+  return out;
+}
+function teachesGrade(state, t, grade){
+  return state.lessons.some(l=>l.teacher===t.name && Number(l.grade)===Number(grade));
+}
+
+function swapSuggestions(state, absent, day, periods){
+  const tt=state.tt, g=Number(absent.grade), c=Number(absent.cls);
+  const maxP = maxPeriodOf(tt,g,day);
+  const allDay = periods.length>=maxP;
+  if(absent.role!=="담임" || allDay) return {};
+  const act = activeLessons(state);
+  const classLessons = act.filter(l=>l.day===day && l.grade===g && l.cls===c && periods.indexOf(l.period)<0);
+  const res={};
+  periods.forEach(p=>{
+    const bi=periodToBlockIdx(tt,g,p);
+    const hasJd = act.some(l=>l.day===day && l.period===p && l.grade===g && l.cls===c);
+    if(hasJd) return;
+    classLessons.forEach(l=>{
+      const jt = state.teachers.find(t=>t.name===l.teacher);
+      if(!jt || jt.excluded) return;
+      const st = statusOf(state, jt, day, bi);
+      if(st.code==="공강"){
+        (res[p]=res[p]||[]).push({teacher:jt, fromPeriod:l.period, subject:l.subject});
+      }
+    });
+  });
+  return res;
+}
+
+// ===== UI & 동기화 =====
+let state=null;
+function uid(){ return "x:"+Date.now().toString(36)+Math.random().toString(36).slice(2,6); }
+function todayStr(){ const d=new Date(); return d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0")+"-"+String(d.getDate()).padStart(2,"0"); }
+function dayOfDate(ds){ const d=new Date(ds+"T00:00:00"); const w=d.getDay(); return (w>=1&&w<=5)? w-1 : null; }
+function dn(t){ return t.name || (t.role==="담임" ? (t.grade+"-"+t.cls+" 담임(미입력)") : "(이름 없음)"); }
+function roleLabel(t){ return t.role==="담임" ? (t.grade+"-"+t.cls+" 담임") : (t.role==="전담" ? "전담("+(t.label||"")+")" : t.role); }
+function esc(s){ return String(s===undefined||s===null?"":s).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c])); }
+function fmtDate(ds){ const d=new Date(ds+"T00:00:00"); const w=["일","월","화","수","목","금","토"][d.getDay()]; return (d.getMonth()+1)+"월 "+d.getDate()+"일("+w+")"; }
+function deepClone(o){ return JSON.parse(JSON.stringify(o)); }
+
+function freshStateFromImport(imp, prev){
+  const teachers=[];
+  imp.classes.forEach(c=>{
+    const [g,k]=c.split("-").map(Number);
+    const id="hr:"+c;
+    const old = prev ? prev.teachers.find(t=>t.id===id) : null;
+    teachers.push({id, role:"담임", grade:g, cls:k, name: old?old.name:((imp.classNames&&imp.classNames[c])||""), excluded: old?!!old.excluded:false, memo: old?old.memo||"":"", adjust: old?old.adjust||0:0});
+  });
+  imp.jdTeachers.forEach(j=>{
+    const id="jd:"+j.name;
+    const old = prev ? prev.teachers.find(t=>t.id===id) : null;
+    teachers.push({id, role:"전담", name:j.name, label:j.label, hours:j.hours, lunchGroup: old?old.lunchGroup:null, excluded: old?!!old.excluded:false, memo: old?old.memo||"":"", adjust: old?old.adjust||0:0});
+  });
+  if(prev){ prev.teachers.filter(t=>t.role!=="담임" && t.role!=="전담").forEach(t=>teachers.push(t)); }
+  return {
+    version:2,
+    semester: prev?prev.semester:2,
+    teachers,
+    lessons: imp.lessons,
+    classNotes: imp.classNotes||{},
+    importWarns: imp.warns||[],
+    importedAt: new Date().toISOString().slice(0,16).replace("T"," "),
+    history: prev?prev.history:[],
+    settings: prev?prev.settings:deepClone(DEFAULT_SETTINGS),
+    tt: prev?prev.tt:deepClone(DEFAULT_TT)
+  };
+}
+
+// ----- Firebase Firestore 연동 -----
+const DOC_REF = () => window.doc(window.db, "app_data", "hyeonggok_v1");
+
+function save(){
+  state._act = null;
+  const c = Object.assign({}, state);
+  delete c._act;
+  
+  if (window.db && window.setDoc) {
+    window.setDoc(DOC_REF(), c).catch(err => {
+      console.error("Firebase 저장 실패:", err);
+      alert("서버 저장 실패: 인터넷 연결 및 Firebase 설정을 확인하세요.");
+    });
+  }
+}
+
+function loadLocalDefault(){
+  state = freshStateFromImport(PRELOAD, null);
+  state.importedAt = "내장 시간표(교사_시간표.xlsx, 2학기 담임·전담)";
+  ensureWeightItems();
+}
+
+function initRealtimeSync() {
+  if (!window.db || !window.onSnapshot) {
+    setTimeout(initRealtimeSync, 100);
+    return;
+  }
+  window.onSnapshot(DOC_REF(), (docSnap) => {
+    if (docSnap.exists()) {
+      state = docSnap.data();
+      state._act = null;
+      ensureWeightItems();
+      render();
+    } else {
+      // DB에 초기 데이터가 없으면 내장 기본값으로 저장
+      loadLocalDefault();
+      save();
+    }
+  });
+}
+
+// ---- 탭 ----
+const TABS=[["dash","대시보드"],["assign","보결 등록·추천"],["status","시간대별 현황"],["teachers","교사 명단"],["edit","시간표 수정"],["import","시간표 불러오기"],["history","이력·통계"],["settings","설정"]];
+let cur="dash";
+function showTab(id){ cur=id; document.querySelectorAll(".tab").forEach(b=>b.classList.toggle("on", b.dataset.t===id)); render(); }
+function render(){
+  if (!state) return;
+  const root=document.getElementById("main");
+  const fn={dash:renderDash, assign:renderAssign, status:renderStatus, teachers:renderTeachers, edit:renderEdit, import:renderImport, history:renderHistory, settings:renderSettings}[cur];
+  root.innerHTML=fn();
+  const after={assign:afterAssign, import:afterImport}[cur]; if(after) after();
+}
+function warnings(){
+  const w=[];
+  const noName=state.teachers.filter(t=>t.role==="담임" && !t.name).length;
+  if(noName) w.push("담임 이름 미입력 "+noName+"개 학급 → [교사 명단]에서 입력");
+  const noLunch=state.teachers.filter(t=>t.role!=="담임" && !t.excluded && !t.lunchGroup).length;
+  if(noLunch) w.push("전담·비담임 점심 그룹 미설정 "+noLunch+"명 → 점심시간이 제외되지 않습니다");
+  if(state.importWarns && state.importWarns.length) w.push("시간표 두 시트 불일치 "+state.importWarns.length+"건 → [시간표 불러오기]에서 확인");
+  return w;
+}
+
+// ---- 대시보드 ----
+function renderDash(){
+  const td=todayStr(); const day=dayOfDate(td);
+  const todays=state.history.filter(h=>h.date===td);
+  const act=activeLessons(state);
+  const w=warnings();
+  return `<div class="grid3">
+    <div class="card"><div class="lbl">오늘</div><div class="big">${fmtDate(td)}</div><div class="sub">${day===null?"주말":DAYS[day]+"요일 · "+state.semester+"학기 적용"}</div></div>
+    <div class="card"><div class="lbl">등록 교사</div><div class="big">${state.teachers.length}명</div><div class="sub">담임 ${state.teachers.filter(t=>t.role==="담임").length} · 전담 ${state.teachers.filter(t=>t.role==="전담").length} · 기타 ${state.teachers.filter(t=>t.role!=="담임"&&t.role!=="전담").length}</div></div>
+    <div class="card"><div class="lbl">전담 수업(이번 학기 유효)</div><div class="big">${act.length}개</div><div class="sub">전체 ${state.lessons.length}개 중 · ${esc(state.importedAt||"")}</div></div>
+  </div>
+  ${w.length?`<div class="warnbox"><b>확인 필요</b><ul>${w.map(x=>`<li>${esc(x)}</li>`).join("")}</ul></div>`:`<div class="okbox">설정이 모두 완료되었습니다.</div>`}
+  <h3>오늘 확정된 보결 (${todays.length}건)</h3>
+  ${todays.length?`<table><tr><th>교시</th><th>학급</th><th>결강 교사</th><th>보결 교사</th><th>구분</th></tr>${todays.map(h=>`<tr><td>${esc(h.periodLabel)}</td><td>${esc(h.cls)}</td><td>${esc(h.absentName)}</td><td>${esc(h.subName)}</td><td>${esc(h.type)}</td></tr>`).join("")}</table>`:`<p class="muted">없음. <a href="#" onclick="showTab('assign');return false;">보결 등록·추천</a>으로 이동</p>`}
+  <h3>사용 순서</h3>
+  <ol class="steps"><li>[교사 명단] 담임·전담 교사 이름과 전담 점심 그룹 확인·수정</li><li>[설정] 현재 학기 확인 (체육 전담 여부가 학기에 따라 바뀜)</li><li>[이력·통계]에서 올해 초부터의 보결 대장 엑셀 불러오기(1회)</li><li>[보결 등록·추천] 결강 교사·날짜·교시 선택 → 추천 → 확정 → 안내문 복사</li><li>시간표 변경 시 [시간표 불러오기]로 새 엑셀을 올리거나, [시간표 수정]에서 교사 이름·수업 칸을 직접 고치세요 (이력은 유지)</li></ol>`;
+}
+
+// ---- 시간대별 현황 ----
+let statusDay = (dayOfDate(todayStr())===null?0:dayOfDate(todayStr()));
+let statusCls = null;
+function renderStatus(){
+  const tt=state.tt;
+  const head = tt.blocks.map((b,bi)=>{
+    const p1=blockIdxToPeriod(tt,1,bi), p2=blockIdxToPeriod(tt,3,bi);
+    return `<th>${b.start}<br><span class="tiny">1·2·6: ${p1===null?"점심":p1+"교시"}<br>3·4·5: ${p2===null?"점심":p2+"교시"}</span></th>`;
+  }).join("");
+  const rows = state.teachers.map(t=>{
+    const cells = tt.blocks.map((b,bi)=>{ const s=statusOf(state,t,statusDay,bi); return `<td class="st-${s.code}" title="${esc(s.detail)}">${s.code}${s.code==="수업"||s.code==="공강"?`<div class="tiny">${esc(s.detail.replace(" 전담수업","").replace(" 담임수업",""))}</div>`:""}</td>`; }).join("");
+    return `<tr><td class="nm">${esc(dn(t))}<div class="tiny">${esc(roleLabel(t))}${t.excluded?" · 제외":""}</div></td>${cells}</tr>`;
+  }).join("");
+  const classes = state.teachers.filter(t=>t.role==="담임").map(t=>t.grade+"-"+t.cls);
+  if(!statusCls) statusCls=classes[0];
+  const act=activeLessons(state);
+  const [cg,cc]=(statusCls||"1-1").split("-").map(Number);
+  const clsTable = `<table class="small"><tr><th>교시</th>${DAYS.map(d=>`<th>${d}</th>`).join("")}</tr>${[1,2,3,4,5,6].map(p=>`<tr><td>${p}</td>${DAYS.map((d,di)=>{ const ls=act.filter(x=>x.day===di&&x.period===p&&x.grade===cg&&x.cls===cc); const over = p>maxPeriodOf(tt,cg,di); return `<td class="${over?"st-종료":(ls.length?"st-공강":"")}">${over?"-":ls.map(x=>x.subject+"<div class='tiny'>"+esc(x.teacher)+"</div>").join("")}</td>`; }).join("")}</tr>`).join("")}</table>`;
+  return `<div class="row"><label>요일 <select onchange="statusDay=Number(this.value);render()">${DAYS.map((d,i)=>`<option value="${i}" ${i===statusDay?"selected":""}>${d}</option>`).join("")}</select></label>
+  <span class="legend"><i class="st-수업"></i>수업 <i class="st-점심"></i>점심(제외) <i class="st-공강"></i>공강(보결 가능) <i class="st-종료"></i>일과 종료(보결 가능)</span></div>
+  <div class="scroll"><table class="status"><tr><th>교사</th>${head}</tr>${rows}</table></div>
+  <h3>학급별 전담 수업 시간 <select onchange="statusCls=this.value;render()">${classes.map(c=>`<option ${c===statusCls?"selected":""}>${c}</option>`).join("")}</select> <span class="muted tiny">색칸 = 담임 공강(전담 수업), '-' = 해당 요일 수업 없음</span></h3>${clsTable}`;
+}
+
+// ---- 교사 명단 ----
+function renderTeachers(){
+  const hr=state.teachers.filter(t=>t.role==="담임"), jd=state.teachers.filter(t=>t.role==="전담"), etc=state.teachers.filter(t=>t.role!=="담임"&&t.role!=="전담");
+  const lunchSel=(t)=>`<select onchange="setT('${t.id}','lunchGroup',this.value?Number(this.value):null)"><option value="" ${!t.lunchGroup?"selected":""}>미설정</option><option value="1" ${t.lunchGroup===1?"selected":""}>1·2·6학년과 동일(12:20~13:00)</option><option value="2" ${t.lunchGroup===2?"selected":""}>3·4·5학년과 동일(13:00~13:50)</option></select>`;
+  return `<h3>담임 교사 (${hr.length}학급)</h3>
+  <div class="two">
+    <table><tr><th>학급</th><th>담임 이름</th><th>보결 제외</th><th>메모</th></tr>
+    ${hr.map(t=>`<tr><td>${t.grade}-${t.cls}</td><td><input value="${esc(t.name)}" placeholder="이름" onchange="setT('${t.id}','name',this.value)"></td><td><input type="checkbox" ${t.excluded?"checked":""} onchange="setT('${t.id}','excluded',this.checked)"></td><td><input value="${esc(t.memo||"")}" placeholder="예: 학년부장" onchange="setT('${t.id}','memo',this.value)"></td></tr>`).join("")}</table>
+    <div><b>한 번에 붙여넣기</b><p class="muted tiny">한 줄에 "학급 이름" (예: 3-1 홍길동). 엑셀 두 열을 복사해 붙여도 됩니다.</p>
+    <textarea id="hrPaste" rows="10" placeholder="1-1 김○○&#10;1-2 이○○"></textarea><br><button onclick="applyHrPaste()">담임 이름 적용</button></div>
+  </div>
+  <h3>전담 교사 (${jd.length}명) <span class="muted tiny">시간표 파일에서 자동 추출</span></h3>
+  <table><tr><th>이름</th><th>담당</th><th>시수</th><th>점심 그룹 (필수)</th><th>보결 제외</th><th>메모</th></tr>
+  ${jd.map(t=>`<tr><td><input value="${esc(t.name)}" placeholder="이름" onchange="renameJd('${t.id}',this.value)"></td><td>${esc(t.label)}</td><td>${esc(t.hours)}</td><td>${lunchSel(t)}</td><td><input type="checkbox" ${t.excluded?"checked":""} onchange="setT('${t.id}','excluded',this.checked)"></td><td><input value="${esc(t.memo||"")}" onchange="setT('${t.id}','memo',this.value)"></td></tr>`).join("")}</table>
+  <p class="muted tiny">전담 교사는 여러 학년을 가르치므로 점심시간을 자동으로 정할 수 없습니다. 실제로 급식하는 시간대를 지정하세요.</p>
+  <h3>비담임·관리자 (${etc.length}명)</h3>
+  <table><tr><th>이름</th><th>구분</th><th>점심 그룹</th><th>보결 제외</th><th>메모</th><th></th></tr>
+  ${etc.map(t=>`<tr><td><input value="${esc(t.name)}" onchange="setT('${t.id}','name',this.value)"></td><td><select onchange="setT('${t.id}','role',this.value)"><option ${t.role==="비담임"?"selected":""}>비담임</option><option ${t.role==="관리자"?"selected":""}>관리자</option></select></td><td>${lunchSel(t)}</td><td><input type="checkbox" ${t.excluded?"checked":""} onchange="setT('${t.id}','excluded',this.checked)"></td><td><input value="${esc(t.memo||"")}" onchange="setT('${t.id}','memo',this.value)"></td><td><button class="sm" onclick="delT('${t.id}')">삭제</button></td></tr>`).join("")}</table>
+  <button onclick="addEtc()">+ 비담임/관리자 추가</button> <span class="muted tiny">교무·연구부장 등 수업 없는 교사, 교감·교장(기본 제외, 설정에서 허용 가능)</span>`;
+}
+function setT(id,k,v){ const t=state.teachers.find(x=>x.id===id); if(!t) return; t[k]=v; save(); if(k==="role"||k==="name") render(); }
+function delT(id){ if(!confirm("삭제할까요?")) return; state.teachers=state.teachers.filter(t=>t.id!==id); save(); render(); }
+function addEtc(){ state.teachers.push({id:uid(), role:"비담임", name:"", lunchGroup:null, excluded:false, memo:"", adjust:0}); save(); render(); }
+function applyHrPaste(){
+  const txt=document.getElementById("hrPaste").value; let n=0;
+  txt.split(/\r?\n/).forEach(line=>{
+    const m=line.trim().match(/^(\d)\s*[-–]\s*(\d+)\s*[\t ,]+\s*(\S+)/); if(!m) return;
+    const t=state.teachers.find(x=>x.role==="담임"&&x.grade===Number(m[1])&&x.cls===Number(m[2])); if(t){ t.name=m[3]; n++; }
+  });
+  save(); render(); alert(n+"개 학급 이름을 적용했습니다.");
+}
+
+// ---- 시간표 불러오기 ----
+let pendingImport=null;
+function renderImport(){
+  return `<div class="two">
+  <div><h3>엑셀 파일 선택</h3>
+  <p class="tiny muted">우리 학교 「교사 시간표.xlsx」 형식 그대로 올리면 됩니다. 시트 이름에 '전담'이 포함된 시트를 전담 시간표로, '담임'(또는 '학급')이 포함된 시트를 학급별 시간표로 읽습니다. 교사명은 "이름(시수)/장소" 칸에서, 학년·반은 "5-2", "3-3/5-2"(합반), "1-1(기)" 형식을 인식합니다.</p>
+  <input type="file" id="xlsxFile" accept=".xlsx,.xls">
+  <div id="xlsxStatus" class="tiny muted"></div>
+  <details><summary>인터넷이 안 될 때: 복사-붙여넣기</summary>
+   <p class="tiny muted">엑셀에서 각 시트 전체(Ctrl+A, Ctrl+C)를 복사해 아래에 붙이세요.</p>
+   전담 시간표 시트<br><textarea id="pasteJd" rows="6"></textarea><br>
+   <button onclick="importFromPaste()">붙여넣은 내용 해석</button></details>
+  </div>
+  <div><h3>현재 적용된 시간표</h3>
+   <p>${esc(state.importedAt||"")} · 전담 ${state.teachers.filter(t=>t.role==="전담").length}명 · 전담 수업 ${state.lessons.length}개 · 학급 ${state.teachers.filter(t=>t.role==="담임").length}개</p>
+   <p><b>학기별 담임 수업 메모</b> (학급 시트의 "체육 1학기 담임" 등)</p>
+   <div class="tiny">${Object.keys(state.classNotes||{}).length? Object.keys(state.classNotes).map(c=>c+": "+state.classNotes[c].map(n=>n.subject+" "+n.semester+"학기 담임").join(", ")).join(" · ") : "없음"}</div>
+   <p><b>두 시트 불일치 (${(state.importWarns||[]).length}건)</b> <span class="muted tiny">전담 시트를 기준으로 계산합니다. 원본 파일을 수정 후 다시 올리면 사라집니다.</span></p>
+   <ul class="tiny warnlist">${(state.importWarns||[]).map(w=>`<li>${esc(w)}</li>`).join("")}</ul>
+  </div></div>
+  <div id="importPreview"></div>`;
+}
+function afterImport(){
+  const inp=document.getElementById("xlsxFile");
+  if(!inp) return;
+  inp.addEventListener("change", e=>{
+    const f=e.target.files[0]; if(!f) return;
+    if(typeof XLSX==="undefined"){ document.getElementById("xlsxStatus").textContent="엑셀 해석 라이브러리를 불러올 수 없습니다(오프라인). 아래 복사-붙여넣기를 이용하세요."; return; }
+    const rd=new FileReader();
+    rd.onload=ev=>{
+      try{
+        const wb=XLSX.read(new Uint8Array(ev.target.result),{type:"array"});
+        const sheets=wb.SheetNames.map(n=>({name:n, rows:XLSX.utils.sheet_to_json(wb.Sheets[n],{header:1, defval:"", raw:false})}));
+        const det=detectSheets(sheets);
+        if(!det.jd){ alert("전담 시간표 시트를 찾지 못했습니다."); return; }
+        pendingImport = buildImport(det.jd.rows, det.cl?det.cl.rows:null);
+        pendingImport.sourceName=f.name+" (전담: "+det.jd.name+(det.cl?", 담임: "+det.cl.name:"")+")";
+        showPreview();
+      }catch(err){ alert("파일을 읽는 중 오류: "+err.message); }
+    };
+    rd.readAsArrayBuffer(f);
+  });
+}
+function tsvRows(txt){ return txt.split(/\r?\n/).map(l=>l.split("\t")); }
+function importFromPaste(){
+  const a=document.getElementById("pasteJd").value;
+  if(!a.trim()){ alert("전담 시간표 내용을 붙여넣어 주세요."); return; }
+  pendingImport=buildImport(tsvRows(a), null); pendingImport.sourceName="붙여넣기 "+todayStr(); showPreview();
+}
+function showPreview(){
+  const p=pendingImport; const el=document.getElementById("importPreview");
+  el.innerHTML=`<div class="card"><h3>미리보기 — ${esc(p.sourceName)}</h3>
+   <p>전담 교사 ${p.jdTeachers.length}명: ${p.jdTeachers.map(t=>esc(t.name)+"("+esc(t.label)+")").join(", ")}</p>
+   <p>전담 수업 ${p.lessons.length}개 · 학급 ${p.classes.length}개: ${p.classes.join(", ")}</p>
+   <p>불일치·경고 ${p.warns.length}건</p><ul class="tiny warnlist">${p.warns.map(w=>`<li>${esc(w)}</li>`).join("")}</ul>
+   <p class="tiny muted">적용하면 시간표만 교체되고, 담임 이름·전담 점심그룹·보결 이력·설정은 유지됩니다.</p>
+   <button class="primary" onclick="applyImport()">이 시간표 적용</button></div>`;
+}
+function applyImport(){
+  const ns=freshStateFromImport(pendingImport, state); ns.importedAt=pendingImport.sourceName+" · "+todayStr();
+  state=ns; save(); pendingImport=null; alert("적용했습니다."); showTab("teachers");
+}
+
+// ---- 시간표 수정 ----
+let edTeacher=null;
+function parseSubj(label){ const r=[],re=/([가-힣A-Za-z]+)\s*\(([^)]*)\)/g; let m; while((m=re.exec(label||""))!==null) r.push({subject:m[1],grades:parseGradeList(m[2])}); return r; }
+function subjFor(t,g){ const s=parseSubj(t.label); const f=s.find(x=>x.grades.indexOf(g)>=0); return f?f.subject:(s[0]?s[0].subject:(t.label||"")); }
+function edConflicts(){
+  const m={},out=[]; const cs=new Set(state.teachers.filter(t=>t.role==="담임").map(t=>t.grade+"-"+t.cls));
+  state.lessons.forEach(l=>{const k=l.grade+"-"+l.cls+"|"+l.day+"|"+l.period;(m[k]=m[k]||[]).push(l.teacher);});
+  Object.keys(m).forEach(k=>{const ts=Array.from(new Set(m[k])); const a=k.split("|"); if(ts.length>1) out.push(a[0]+" "+DAYS[a[1]]+" "+a[2]+"교시에 "+ts.join(", ")+" 중복 배정");});
+  const u=new Set(); state.lessons.forEach(l=>{const c=l.grade+"-"+l.cls; if(!cs.has(c)) u.add(c+" ("+l.teacher+")");}); u.forEach(x=>out.push("명단에 없는 학급: "+x));
+  return out;
+}
+function confHtml(){ const c=edConflicts(); return c.length?`<div class="warnbox"><b>시간표 충돌·오류 ${c.length}건</b><ul>${c.map(x=>`<li>${esc(x)}</li>`).join("")}</ul></div>`:`<div class="okbox">충돌 없음 — 같은 학급에 두 전담이 겹치지 않고, 모든 학급이 명단에 있습니다.</div>`; }
+function renderEdit(){
+  const jd=state.teachers.filter(t=>t.role==="전담");
+  if(!jd.find(t=>t.id===edTeacher)) edTeacher=jd[0]?jd[0].id:null;
+  const t=jd.find(x=>x.id===edTeacher);
+  let jdGrid="";
+
+  if(t){
+    const mine=state.lessons.filter(l=>l.teacher===t.name);
+    const maxp=Math.max(5,...mine.map(l=>l.period));
+    let rows="";
+    for(let p=1;p<=maxp;p++){
+      rows+=`<tr><th>${p}</th>${DAYS.map((d,di)=>{
+        const v=mine.filter(l=>l.day===di&&l.period===p).map(l=>l.grade+"-"+l.cls).join("/");
+        return `<td><input class="cell" value="${esc(v)}" onchange="setCell('${t.id}',${di},${p},this.value,this)"></td>`;
+      }).join("")}</tr>`;
+    }
+    jdGrid=`<div class="row form"><label>이름 <input value="${esc(t.name)}" onchange="renameJd('${t.id}',this.value)"></label>
+      <label>담당 과목·학년 <input style="width:210px" value="${esc(t.label||"")}" onchange="setLabel('${t.id}',this.value)"></label>
+      <button class="danger sm" onclick="delJd('${t.id}')">이 전담교사 삭제</button></div>
+      <p class="tiny muted">담당 예: <b>과학(3,4,6)</b>, <b>즐생(1~2) 영어(3~5)</b> — 학년에 따라 수업 과목이 자동 결정됩니다. 칸에는 학급을 <b>5-2</b> 형식으로, 합반은 <b>3-3/5-2</b>로 입력하고, 수업이 없으면 비웁니다.</p>
+      <table class="small"><tr><th>교시</th>${DAYS.map(d=>`<th>${d}</th>`).join("")}</tr>${rows}</table>`;
+  }
+
+  return `<div>
+   <h3>전담 교사 시간표 수정</h3>
+   <div class="row"><label>교사 선택 <select onchange="edTeacher=this.value;render()">${jd.map(x=>`<option value="${x.id}" ${x.id===edTeacher?"selected":""}>${esc(x.name)} — ${esc(x.label||"")}</option>`).join("")}</select></label>
+   <button onclick="addJd()">+ 전담교사 추가</button></div>
+   ${jdGrid}<div id="edConf">${confHtml()}</div>
+   <h3>엑셀로 내보내기</h3><button onclick="exportXlsx()">수정한 시간표 .xlsx 내려받기</button>
+   <p class="tiny muted">전담 시간표를 엑셀로 저장합니다. 전담 수업으로 지정되지 않은 시간은 자동으로 담임 수업으로 처리됩니다. 수정 내용은 자동 저장됩니다.</p>
+  </div>`;
+}
+function setCell(id,d,p,v,el){
+  const t=state.teachers.find(x=>x.id===id); const nl=[];
+  for(const tok of v.split(/[\/,]/).map(s=>s.trim()).filter(Boolean)){
+    const m=tok.match(/^(\d)\s*-\s*(\d+)$/);
+    if(!m){ alert("'"+tok+"' 형식이 잘못되었습니다. 예: 5-2 또는 3-3/5-2"); return render(); }
+    nl.push({teacher:t.name,day:d,period:p,grade:+m[1],cls:+m[2],subject:subjFor(t,+m[1])});
+  }
+  state.lessons=state.lessons.filter(l=>!(l.teacher===t.name&&l.day===d&&l.period===p)).concat(nl);
+  state.importWarns=[]; save();
+  if(el) el.value=nl.map(l=>l.grade+"-"+l.cls).join("/");
+  const c=document.getElementById("edConf"); if(c) c.innerHTML=confHtml();
+}
+function setLabel(id,v){ const t=state.teachers.find(x=>x.id===id); t.label=v.trim(); state.lessons.forEach(l=>{ if(l.teacher===t.name) l.subject=subjFor(t,l.grade); }); save(); render(); }
+function renameJd(id,nn){
+  nn=nn.trim(); const t=state.teachers.find(x=>x.id===id);
+  if(!nn||state.teachers.some(x=>x!==t&&x.role==="전담"&&x.name===nn)){ alert("이름이 비었거나 이미 있는 이름입니다."); return render(); }
+  const old=t.name, nid="jd:"+nn;
+  state.lessons.forEach(l=>{ if(l.teacher===old) l.teacher=nn; });
+  state.history.forEach(h=>{ if(h.subId===id) h.subId=nid; if(h.absentId===id) h.absentId=nid; if(h.subName===old) h.subName=nn; if(h.absentName===old) h.absentName=nn; });
+  t.name=nn; t.id=nid; edTeacher=nid; save(); render();
+}
+function addJd(){
+  const n=(prompt("새 전담교사 이름")||"").trim(); if(!n) return;
+  if(state.teachers.some(x=>x.role==="전담"&&x.name===n)){ alert("이미 있는 이름입니다."); return; }
+  const lb=(prompt("담당 과목(학년) 예: 음악(3~6)")||"").trim();
+  const id="jd:"+n; state.teachers.push({id,role:"전담",name:n,label:lb,hours:"",lunchGroup:null,excluded:false,memo:"",adjust:0});
+  edTeacher=id; save(); render();
+}
+function delJd(id){
+  const t=state.teachers.find(x=>x.id===id); if(!confirm(t.name+" 선생님과 그 수업 시간표를 삭제할까요? (보결 이력은 유지됩니다)")) return;
+  state.lessons=state.lessons.filter(l=>l.teacher!==t.name); state.teachers=state.teachers.filter(x=>x.id!==id); state.importWarns=[]; save(); render();
+}
+function addClass(){
+  const v=(prompt("추가할 학급 (예: 6-5)")||"").trim(); const m=v.match(/^(\d)\s*-\s*(\d+)$/); if(!m) return;
+  const g=+m[1],c=+m[2],id="hr:"+g+"-"+c; if(state.teachers.some(x=>x.id===id)){ alert("이미 있는 학급입니다."); return; }
+  state.teachers.push({id,role:"담임",grade:g,cls:c,name:"",excluded:false,memo:"",adjust:0});
+  const hr=state.teachers.filter(x=>x.role==="담임").sort((a,b)=>a.grade-b.grade||a.cls-b.cls);
+  state.teachers=hr.concat(state.teachers.filter(x=>x.role!=="담임")); save(); render();
+}
+function delClass(id){
+  const t=state.teachers.find(x=>x.id===id); if(!confirm(t.grade+"-"+t.cls+" 학급을 삭제할까요? 이 학급의 전담 수업도 함께 삭제됩니다.")) return;
+  state.lessons=state.lessons.filter(l=>!(l.grade===t.grade&&l.cls===t.cls)); state.teachers=state.teachers.filter(x=>x.id!==id); state.importWarns=[]; save(); render();
+}
+function exportXlsx(){
+  if(typeof XLSX==="undefined"){ alert("엑셀 라이브러리를 불러올 수 없습니다(오프라인). 인터넷 연결 후 다시 시도하세요."); return; }
+  const grid=(ls,title)=>{ const r=[]; const mp=Math.max(5,...ls.map(l=>l.period)); r.push(["요일"].concat(DAYS)); r.push(["교시"]);
+    for(let p=1;p<=mp;p++) r.push([String(p)].concat(DAYS.map((d,di)=>title(ls.filter(l=>l.day===di&&l.period===p))))); return r; };
+  const jr=[["1) 교과별 전담 시간표"]];
+  state.teachers.filter(t=>t.role==="전담").forEach(t=>{ jr.push([t.label,"",t.name]); grid(state.lessons.filter(l=>l.teacher===t.name),a=>a.map(l=>l.grade+"-"+l.cls).join("/")).forEach(x=>jr.push(x)); });
+  const wb=XLSX.utils.book_new();
+  XLSX.utils.book_append_sheet(wb,XLSX.utils.aoa_to_sheet(jr),"전담 시간표");
+  XLSX.writeFile(wb,"교사_시간표_수정_"+todayStr()+".xlsx");
+}
+
+// ---- 보결 등록·추천 ----
+let A={absentId:"", date:todayStr(), periods:[], longTerm:false, reason:"", result:null, picks:{}, lunchPick:""};
+function renderAssign(){
+  const grp=(role)=>state.teachers.filter(t=>t.role===role).map(t=>`<option value="${t.id}" ${A.absentId===t.id?"selected":""}>${esc(dn(t))} — ${esc(roleLabel(t))}</option>`).join("");
+  const absent=state.teachers.find(t=>t.id===A.absentId);
+  const day=dayOfDate(A.date);
+  let periodBoxes="";
+  if(absent && day!==null){
+    const tt=state.tt; const act=activeLessons(state);
+    if(absent.role==="담임"){
+      const mp=maxPeriodOf(tt,absent.grade,day);
+      for(let p=1;p<=mp;p++){ const bi=periodToBlockIdx(tt,absent.grade,p); const l=act.find(x=>x.day===day&&x.period===p&&x.grade===absent.grade&&x.cls===absent.cls);
+        periodBoxes+=`<label class="chk"><input type="checkbox" value="${p}" ${A.periods.indexOf(p)>=0?"checked":""} onchange="togglePeriod(${p},this.checked)"> ${p}교시 <span class="tiny">${blockLabel(tt,bi)}${l?" · "+l.subject+" 전담":""}</span></label>`; }
+      periodBoxes+=` <button class="sm" onclick="selAll(${mp})">전체 선택</button>`;
+    } else if(absent.role==="전담"){
+      const mine=act.filter(x=>x.teacher===absent.name&&x.day===day);
+      const ps=Array.from(new Set(mine.map(x=>x.period))).sort();
+      if(!ps.length) periodBoxes=`<span class="muted">${DAYS[day]}요일에는 이 교사의 수업이 없습니다(보결 불필요).</span>`;
+      ps.forEach(p=>{ const ls=mine.filter(x=>x.period===p); const bi=periodToBlockIdx(tt,ls[0].grade,p);
+        periodBoxes+=`<label class="chk"><input type="checkbox" value="${p}" ${A.periods.indexOf(p)>=0?"checked":""} onchange="togglePeriod(${p},this.checked)"> ${p}교시 <span class="tiny">${blockLabel(tt,bi)} · ${ls.map(x=>x.grade+"-"+x.cls).join("/")} ${ls[0].subject}</span></label>`; });
+      if(ps.length) periodBoxes+=` <button class="sm" onclick="selAll(0,[${ps.join(",")}])">전체 선택</button>`;
+    } else periodBoxes=`<span class="muted">비담임·관리자는 수업이 없어 보결이 필요하지 않습니다.</span>`;
+  } else if(absent && day===null) periodBoxes=`<span class="warn">주말입니다. 날짜를 확인하세요.</span>`;
+  return `<div class="card form">
+   <div class="row"><label>결강 교사 <select onchange="A.absentId=this.value;A.periods=[];A.result=null;render()"><option value="">선택</option><optgroup label="담임">${grp("담임")}</optgroup><optgroup label="전담">${grp("전담")}</optgroup><optgroup label="기타">${grp("비담임")}${grp("관리자")}</optgroup></select></label>
+   <label>날짜 <input type="date" value="${A.date}" onchange="A.date=this.value;A.periods=[];A.result=null;render()"> <b>${day===null?"":DAYS[day]+"요일"}</b></label>
+   <label>사유 <input value="${esc(A.reason)}" placeholder="출장/병가/조퇴 등" onchange="A.reason=this.value"></label></div>
+   <div class="row"><span>결강 교시</span> ${periodBoxes}</div>
+   <div class="row"><label class="chk"><input type="checkbox" ${A.longTerm?"checked":""} onchange="A.longTerm=this.checked"> 1주일 이상 장기 결원</label>
+   <button class="primary" onclick="compute()" ${absent&&A.periods.length?"":"disabled"}>추천 계산</button></div>
+  </div>
+  <div id="result">${A.result?renderResult():""}</div>`;
+}
+function togglePeriod(p,on){ if(on){ if(A.periods.indexOf(p)<0) A.periods.push(p);} else A.periods=A.periods.filter(x=>x!==p); A.periods.sort((a,b)=>a-b); A.result=null; document.querySelector("#main button.primary").disabled=!A.periods.length; }
+function selAll(mp,list){ A.periods=list?list.slice():Array.from({length:mp},(_,i)=>i+1); A.result=null; render(); }
+function afterAssign(){}
+function compute(){
+  const absent=state.teachers.find(t=>t.id===A.absentId); const day=dayOfDate(A.date); const tt=state.tt; const act=activeLessons(state);
+  const tentative={}; const items=[]; A.picks={}; const usedSwap=[];
+  const swaps = absent.role==="담임" ? swapSuggestions(state,absent,day,A.periods) : {};
+  A.periods.forEach(p=>{
+    let grade, cls, clsLabel, bi, note=null, homeroomFirst=false;
+    if(absent.role==="담임"){
+      grade=absent.grade; cls=absent.cls; clsLabel=grade+"-"+cls; bi=periodToBlockIdx(tt,grade,p);
+      const l=act.find(x=>x.day===day&&x.period===p&&x.grade===grade&&x.cls===cls);
+      if(l){ note="이 시간은 "+l.subject+" 전담("+l.teacher+") 수업 시간입니다. 담임 보결이 필요하지 않습니다."; items.push({p,bi,grade,cls,clsLabel,note,cands:[],swaps:[]}); return; }
+    } else {
+      const ls=act.filter(x=>x.teacher===absent.name&&x.day===day&&x.period===p);
+      grade=ls[0].grade; cls=ls[0].cls; clsLabel=ls.map(x=>x.grade+"-"+x.cls).join("/"); bi=periodToBlockIdx(tt,grade,p); homeroomFirst=true;
+      if(ls.length>1) note="합반 수업입니다. 각 학급 담임이 자기 학급을 맡는 방안도 검토하세요.";
+    }
+    const cands=rankCandidates(state,{absent,day,dateStr:A.date,period:p,grade,cls,bi,tentative,homeroomFirst});
+    const sw=(swaps[p]||[]).filter(s=>usedSwap.indexOf(s.teacher.id+"@"+s.fromPeriod)<0);
+    let pick = sw.length ? "swap:0" : (cands.length? cands[0].teacher.id : "");
+    if(pick && !pick.startsWith("swap:")) tentative[pick]=(tentative[pick]||0)+1;
+    if(pick==="swap:0") usedSwap.push(sw[0].teacher.id+"@"+sw[0].fromPeriod);
+    A.picks[p]=pick;
+    items.push({p,bi,grade,cls,clsLabel,note,cands,swaps:sw});
+  });
+  let lunch=null;
+  if(state.settings.lunchSupervisor && absent.role==="담임"){
+    const g=absent.grade; const lb=lunchBlockIdx(groupOf(tt,g)); const mp=maxPeriodOf(tt,g,day);
+    const before=blockIdxToPeriod(tt,g,lb-1), after=blockIdxToPeriod(tt,g,lb+1);
+    const touches = A.periods.indexOf(before)>=0 || (after && after<=mp && A.periods.indexOf(after)>=0);
+    if(touches){
+      const cands=rankCandidates(state,{absent,day,dateStr:A.date,period:5,grade:g,cls:absent.cls,bi:lb,tentative,homeroomFirst:false});
+      lunch={bi:lb,cands}; A.lunchPick=cands.length?cands[0].teacher.id:"";
+    }
+  }
+  A.result={absent,day,items,lunch,swaps}; render();
+}
+function renderResult(){
+  const R=A.result, tt=state.tt, absent=R.absent;
+  const notes=[];
+  if(A.longTerm) notes.push("1주일 이상 장기 결원: 대체강사 충원이 원칙이며, 담임은 대체강사 확보가 어려우면 교과전담 교사를 임시담임으로 배정합니다(규정 4-나-3). 아래 추천은 대체강사 배치 전까지의 임시 조치입니다.");
+  if(A.periods.length>=3) notes.push("3교시 이상 다수 결원: 학년부장과 협의하여 학교 상황을 고려해 배정하세요(규정 5-가).");
+  const html = R.items.map(it=>{
+    const head=`<div class="rh"><b>${it.p}교시</b> <span class="tiny">${blockLabel(tt,it.bi)}</span> · ${it.clsLabel}</div>`;
+    if(it.note && !it.cands.length) return `<div class="ritem">${head}<div class="okbox">${esc(it.note)}</div></div>`;
+    const swapHtml = it.swaps.map((s,i)=>`<label class="cand swap"><input type="radio" name="pick${it.p}" value="swap:${i}" ${A.picks[it.p]==="swap:"+i?"checked":""} onchange="A.picks[${it.p}]=this.value"> <b>0순위 교체</b> ${esc(s.teacher.name)} — ${s.fromPeriod}교시 ${esc(s.subject)} 수업을 ${it.p}교시로 당겨서 진행, 담임은 ${s.fromPeriod}교시에 자기 수업 <span class="tiny">(규정 4-가 전담 시간 교체 최우선)</span></label>`).join("");
+    const top=it.cands.slice(0,3).map((c,i)=>`<label class="cand"><input type="radio" name="pick${it.p}" value="${c.teacher.id}" ${A.picks[it.p]===c.teacher.id?"checked":""} onchange="A.picks[${it.p}]=this.value"> <b>${i+1}순위</b> ${esc(dn(c.teacher))} <span class="tiny">${esc(roleLabel(c.teacher))} · ${c.status.code}${c.status.detail?"("+esc(c.status.detail)+")":""} · ${c.score}점</span><div class="tiny reasons">${c.reasons.map(esc).join(" · ")}</div></label>`).join("");
+    const rest=it.cands.slice(3);
+    const more = rest.length?`<label class="tiny">그 외 후보 <select onchange="if(this.value){A.picks[${it.p}]=this.value; document.querySelectorAll('input[name=pick${it.p}]').forEach(r=>r.checked=false);}"><option value="">선택…</option>${rest.map(c=>`<option value="${c.teacher.id}">${esc(dn(c.teacher))} (${c.score}점, ${esc(c.reasons[0]||"")})</option>`).join("")}</select></label>`:"";
+    return `<div class="ritem">${head}${it.note?`<div class="tiny warn">${esc(it.note)}</div>`:""}${swapHtml}${top||`<div class="warn">가능한 교사가 없습니다. 하루 최대 보결 수(설정) 또는 제외 설정을 확인하거나, 규정 4-나-1-다에 따라 협의 배정하세요.</div>`}${more}</div>`;
+  }).join("");
+  const lunchHtml = R.lunch?`<div class="ritem"><div class="rh"><b>점심시간 급식지도</b> <span class="tiny">${blockLabel(tt,R.lunch.bi)}</span> · ${absent.grade}-${absent.cls} <span class="tiny">(규정 5-다: 수기 서명 후 1차시분 수당)</span></div>${R.lunch.cands.slice(0,3).map((c,i)=>`<label class="cand"><input type="radio" name="lunch" value="${c.teacher.id}" ${A.lunchPick===c.teacher.id?"checked":""} onchange="A.lunchPick=this.value"> <b>${i+1}순위</b> ${esc(dn(c.teacher))} <span class="tiny">${esc(roleLabel(c.teacher))} ·${c.status.code}</span></label>`).join("")||"<div class='warn'>가능한 교사가 없습니다.</div>"}<label class="cand"><input type="radio" name="lunch" value="" ${!A.lunchPick?"checked":""} onchange="A.lunchPick=''"> 배정하지 않음</label></div>`:"";
+  return `<div class="card"><h3>${fmtDate(A.date)} ${esc(dn(absent))} (${esc(roleLabel(absent))}) 결강 — 추천 결과</h3>
+   ${notes.map(n=>`<div class="warnbox tiny">${esc(n)}</div>`).join("")}
+   ${html}${lunchHtml}
+   <div class="row"><button class="primary" onclick="confirmAssign()">선택한 배정 확정</button> <span class="tiny muted">확정 시 이력에 기록되고 안내문이 생성됩니다. 결재는 결강교사가 신청(긴급 시 학년부장).</span></div>
+   <div id="notice"></div></div>`;
+}
+function confirmAssign(){
+  const R=A.result, tt=state.tt, absent=R.absent; const added=[];
+  R.items.forEach(it=>{
+    if(!it.cands.length && !it.swaps.length) return;
+    const pick=A.picks[it.p]; if(!pick) return;
+    let subId, subName, type="보결";
+    if(pick.startsWith("swap:")){ const s=it.swaps[Number(pick.split(":")[1])]; subId=s.teacher.id; subName=s.teacher.name; type="교체"; }
+    else { const t=state.teachers.find(x=>x.id===pick); if(!t) return; subId=t.id; subName=dn(t); }
+    const h={id:uid(), date:A.date, day:R.day, absentId:absent.id, absentName:dn(absent), cls:it.clsLabel, period:it.p, periodLabel:it.p+"교시", bi:it.bi, subId, subName, type, reason:A.reason, semester:state.semester};
+    state.history.push(h); added.push(h);
+  });
+  if(R.lunch && A.lunchPick){ const t=state.teachers.find(x=>x.id===A.lunchPick); if(t){ const h={id:uid(), date:A.date, day:R.day, absentId:absent.id, absentName:dn(absent), cls:absent.grade+"-"+absent.cls, period:0, periodLabel:"점심", bi:R.lunch.bi, subId:t.id, subName:dn(t), type:"보결", reason:A.reason, semester:state.semester}; state.history.push(h); added.push(h);} }
+  save();
+  document.getElementById("notice").innerHTML = added.length? `<h3>안내문</h3><textarea id="noticeTxt" rows="14">${esc(makeNotice(absent, added))}</textarea><br><button onclick="copyNotice()">복사</button> <button onclick="A={absentId:'',date:todayStr(),periods:[],longTerm:false,reason:'',result:null,picks:{},lunchPick:''};render()">새 등록</button>` : `<div class="warn">확정된 항목이 없습니다.</div>`;
+}
+function makeNotice(absent, added){
+  const tt=state.tt; const day=added[0].day;
+  const L=[]; L.push("[보결 안내] "+fmtDate(A.date)+" "+dn(absent)+" 선생님("+roleLabel(absent)+") 결강"+(A.reason?" — "+A.reason:""));
+  L.push("");
+  added.slice().sort((a,b)=>a.bi-b.bi).forEach(h=>{
+    const [g]=String(h.cls).split("-").map(Number);
+    const mp=maxPeriodOf(tt,g,day); const lb=lunchBlockIdx(groupOf(tt,g));
+    const tags=[];
+    if(h.period===1) tags.push("아침활동·과제검사·출결 점검");
+    if(h.period>0 && h.bi===lb-1) tags.push("급식지도 담당");
+    if(h.period===mp) tags.push("하교·전달사항·청소지도");
+    if(h.periodLabel==="점심") tags.push("급식지도, 보결대장 수기 서명");
+    const t=state.teachers.find(x=>x.id===h.subId);
+    L.push("- "+h.periodLabel+"("+blockLabel(tt,h.bi)+") "+h.cls+": "+h.subName+(t?"("+roleLabel(t)+")":"")+(h.type==="교체"?" ※전담 시간 교체":"")+(tags.length?" ※"+tags.join(", "):""));
+  });
+  L.push("");
+  L.push("※ 결강교사가 보결교사 지정·결재 신청(긴급 시 학년부장). 보결수당은 시간당 "+state.settings.wagePerHour.toLocaleString()+"원, 학기별 지급.");
+  return L.join("\n");
+}
+function copyNotice(){ const ta=document.getElementById("noticeTxt"); ta.select(); try{ navigator.clipboard.writeText(ta.value); }catch(e){ document.execCommand("copy"); } alert("복사했습니다."); }
+
+// ---- 과거 이력 불러오기 ----
+let pendingHist=null;
+function normName(s){ return String(s||"").replace(/\(.*?\)/g,"").replace(/\s+/g,""); }
+function parseHistRows(rows){
+  const out={items:[],bad:[]}; const H=s=>String(s===undefined||s===null?"":s).replace(/\s+/g,"");
+  let col=null, lastDate="";
+  rows.forEach((r,ri)=>{
+    const hs=r.map(H);
+    if(hs.some(x=>/^(일자|날짜)/.test(x)) && hs.some(x=>/^(보강|보결)/.test(x))){
+      col={}; lastDate="";
+      hs.forEach((x,j)=>{ if(/^(일자|날짜)/.test(x)) col.date=j; else if(/^학년/.test(x)) col.cls=j; else if(/^교시/.test(x)) col.p=j; else if(/^교과/.test(x)) col.subj=j; else if(/^결강/.test(x)) col.abs=j; else if(/^사유/.test(x)) col.reason=j; else if(/^(보강|보결)/.test(x)&&col.sub===undefined) col.sub=j; });
+      return;
+    }
+    if(!col) return;
+    const g=k=>col[k]===undefined?"":String(r[col[k]]===undefined||r[col[k]]===null?"":r[col[k]]).trim();
+    const dm=g("date").match(/(\d{4})\D+(\d{1,2})\D+(\d{1,2})/);
+    if(dm) lastDate=dm[1]+"-"+dm[2].padStart(2,"0")+"-"+dm[3].padStart(2,"0");
+    const cm=g("cls").match(/(\d)\s*(?:학년)?\s*[\/\-]\s*(\d+)/), pm=g("p").match(/\d/), ab=normName(g("abs")), sb=normName(g("sub"));
+    if(!cm&&!pm&&!ab&&!sb) return;
+    if(!lastDate||!cm||!pm||!ab||!sb){ out.bad.push((ri+1)+"행: 날짜·학급·교시·결강교사·보강교사 중 빈 칸이 있어 제외"); return; }
+    out.items.push({date:lastDate,grade:+cm[1],cls:+cm[2],period:+pm[0],subject:g("subj"),absent:ab,sub:sb,reason:g("reason"),row:ri+1});
+  });
+  return out;
+}
+function findTeacherByName(n){ return state.teachers.find(x=>normName(x.name)===n); }
+function histKey(h){ return [h.date,h.period,h.cls,h.subName,h.absentName].join("|"); }
+function previewHist(parsedList){
+  const items=[],bad=[]; parsedList.forEach(p=>{ items.push(...p.items); bad.push(...p.bad); });
+  const exist=new Set(state.history.map(histKey)); const add=[],dup=[],unk=new Set();
+  items.forEach(it=>{
+    const day=dayOfDate(it.date); if(day===null){ bad.push(it.row+"행: "+it.date+" 은(는) 주말이라 제외"); return; }
+    const a=findTeacherByName(it.absent), s=findTeacherByName(it.sub); if(!a) unk.add(it.absent); if(!s) unk.add(it.sub);
+    const h={id:uid(),date:it.date,day,absentId:a?a.id:"ext:"+it.absent,absentName:a?dn(a):it.absent,cls:it.grade+"-"+it.cls,period:it.period,periodLabel:it.period+"교시",bi:periodToBlockIdx(state.tt,it.grade,it.period),subId:s?s.id:"ext:"+it.sub,subName:s?dn(s):it.sub,type:"보결",reason:it.reason,subject:it.subject,semester:it.date>=state.settings.semesterStart[2]?2:1,imported:true};
+    if(exist.has(histKey(h))) dup.push(h); else { exist.add(histKey(h)); add.push(h); }
+  });
+  pendingHist={add,dup,unk:Array.from(unk),bad}; showHistPreview();
+}
+function showHistPreview(){
+  const p=pendingHist, el=document.getElementById("histPreview"); if(!el) return;
+  const by={}; p.add.forEach(h=>{ by[h.subName]=(by[h.subName]||0)+1; });
+  const s1=p.add.filter(h=>h.semester===1).length, s2=p.add.length-s1;
+  const cnt=state.semester===1?s1:s2;
+  el.innerHTML=`<div class="card"><b>미리보기</b> — 새로 추가 <b>${p.add.length}건</b> (1학기 ${s1} · 2학기 ${s2}) · 이미 있는 이력 ${p.dup.length}건 건너뜀 · 제외된 줄 ${p.bad.length}건
+   <div class="tiny" style="margin:6px 0">보강교사별: ${Object.keys(by).sort((a,b)=>by[b]-by[a]).map(k=>esc(k)+" "+by[k]+"회").join(", ")||"없음"}</div>
+   ${p.unk.length?`<div class="warnbox tiny"><b>현재 명단에 없는 이름 ${p.unk.length}명</b>: ${p.unk.map(esc).join(", ")}<br>이름으로만 기록되고 누적 통계에는 잡히지 않습니다. 오타라면 엑셀을 고쳐서 다시 올리세요.</div>`:""}
+   ${p.bad.length?`<ul class="tiny warnlist">${p.bad.map(x=>`<li>${esc(x)}</li>`).join("")}</ul>`:""}
+   <div class="tiny muted">현재 ${state.semester}학기 누적에는 ${cnt}건이 반영됩니다. (이전 학기 이력은 이력 목록에만 남고 현재 학기 누적에는 포함되지 않습니다.)</div>
+   <button class="primary" onclick="applyHist()" ${p.add.length?"":"disabled"}>이 이력 ${p.add.length}건 추가</button></div>`;
+}
+function applyHist(){ state.history.push(...pendingHist.add); const n=pendingHist.add.length; pendingHist=null; save(); alert(n+"건을 추가했습니다."); render(); }
+function histFile(f){
+  if(!f) return; if(typeof XLSX==="undefined"){ alert("엑셀 라이브러리를 불러올 수 없습니다(오프라인). 아래 복사-붙여넣기를 이용하세요."); return; }
+  const rd=new FileReader();
+  rd.onload=ev=>{ try{ const wb=XLSX.read(new Uint8Array(ev.target.result),{type:"array"});
+    previewHist(wb.SheetNames.map(n=>parseHistRows(XLSX.utils.sheet_to_json(wb.Sheets[n],{header:1,defval:"",raw:false})))); }catch(e){ alert("파일을 읽는 중 오류: "+e.message); } };
+  rd.readAsArrayBuffer(f);
+}
+function histPaste(){ const t=document.getElementById("histPasteTxt").value; if(!t.trim()){ alert("내용을 붙여넣어 주세요."); return; } previewHist([parseHistRows(tsvRows(t))]); }
+const HIST_CARD=`<div class="card"><h3>앱 도입 전 보결 이력 불러오기</h3>
+ <p class="tiny muted">보결 대장 엑셀을 올리면 열 제목(일자·학년/반·교시·교과·결강교사·사유·보강교사)을 찾아 읽습니다. 날짜 칸이 병합되어 있어도 됩니다. 이미 들어 있는 이력과 같은 건은 건너뛰므로 여러 번 올려도 중복되지 않습니다.</p>
+ <input type="file" accept=".xlsx,.xls" onchange="histFile(this.files[0])">
+ <details><summary class="tiny">인터넷이 안 될 때: 복사-붙여넣기</summary><textarea id="histPasteTxt" rows="5" placeholder="머리글 줄부터 표를 복사해 붙여넣기"></textarea><br><button onclick="histPaste()">붙여넣은 내용 해석</button></details>
+ <div id="histPreview"></div></div>`;
+
+// ---- 이력·통계 ----
+function renderHistory(){
+  const semStart=state.settings.semesterStart[state.semester]||"2000-01-01";
+  const hist=state.history.slice().sort((a,b)=> b.date.localeCompare(a.date) || a.bi-b.bi);
+  const stats=state.teachers.map(t=>{ const s=countStats(state,t.id,todayStr()); return {t, sem:s.sem, mon:s.mon, last:s.last}; }).sort((a,b)=>b.sem-a.sem);
+  return HIST_CARD+`<div class="row"><h3>보결 이력 (${hist.length}건)</h3> <button onclick="exportCsv()">CSV 내려받기</button></div>
+  <div class="scroll"><table><tr><th>날짜</th><th>교시</th><th>학급</th><th>결강</th><th>보결 교사</th><th>구분</th><th>사유</th><th></th></tr>
+  ${hist.map(h=>`<tr><td>${h.date}</td><td>${esc(h.periodLabel)}</td><td>${esc(h.cls)}</td><td>${esc(h.absentName)}</td><td>${esc(h.subName)}</td><td>${h.type}</td><td>${esc(h.reason||"")}</td><td><button class="sm" onclick="delH('${h.id}')">삭제</button></td></tr>`).join("")||"<tr><td colspan=8 class='muted'>없음</td></tr>"}</table></div>
+  <h3>교사별 누적 (${state.semester}학기, ${semStart} 이후) <span class="tiny muted">교체는 횟수에 포함하지 않음. 보정값은 앱 도입 전 횟수 등을 더할 때 사용.</span></h3>
+  <table><tr><th>교사</th><th>구분</th><th class="r">학기 누적</th><th class="r">이번 달</th><th>마지막 배정</th><th class="r">보정</th></tr>
+  ${stats.map(s=>`<tr><td>${esc(dn(s.t))}</td><td>${esc(roleLabel(s.t))}</td><td class="r">${s.sem}</td><td class="r">${s.mon}</td><td>${s.last||"-"}</td><td class="r"><input type="number" class="num" value="${s.t.adjust\vert{}\vert{}0}" onchange="setT('${s.t.id}','adjust',Number(this.value))"></td></tr>`).join("")}</table>`;
+}
+function delH(id){ if(!confirm("이 이력을 삭제할까요?")) return; state.history=state.history.filter(h=>h.id!==id); save(); render(); }
+function exportCsv(){
+  const rows=[["날짜","요일","교시","학급","결강교사","보결교사","구분","사유","학기"]].concat(state.history.map(h=>[h.date,DAYS[h.day],h.periodLabel,h.cls,h.absentName,h.subName,h.type,h.reason||"",h.semester]));
+  const csv="\uFEFF"+rows.map(r=>r.map(v=>'"'+String(v).replace(/"/g,'""')+'"').join(",")).join("\n");
+  dl(new Blob([csv],{type:"text/csv"}), "보결이력_"+todayStr()+".csv");
+}
+function dl(blob,name){ const a=document.createElement("a"); a.href=URL.createObjectURL(blob); a.download=name; a.click(); }
+
+// ---- 설정 ----
+function renderSettings(){
+  const s=state.settings, tt=state.tt;
+  ensureWeightItems();
+  return `<div class="two">
+  <div><h3>기본</h3>
+   <label>현재 학기 <select onchange="state.semester=Number(this.value);save();render()"><option value="1" ${state.semester===1?"selected":""}>1학기</option><option value="2" ${state.semester===2?"selected":""}>2학기</option></select> <span class="tiny muted">학급 시트 메모("체육 1학기 담임")에 따라 해당 학기에는 그 과목을 담임 수업으로 계산</span></label><br>
+   <label>1학기 시작일 <input type="date" value="${s.semesterStart[1]}" onchange="state.settings.semesterStart[1]=this.value;save()"></label>
+   <label>2학기 시작일 <input type="date" value="${s.semesterStart[2]}" onchange="state.settings.semesterStart[2]=this.value;save()"></label><br>
+   <label>한 교사 하루 최대 보결 <input type="number" class="num" value="${s.maxPerDay}" onchange="state.settings.maxPerDay=Number(this.value);save()">교시</label><br>
+   <label>시간당 보결수당 <input type="number" class="num w" value="${s.wagePerHour}" onchange="state.settings.wagePerHour=Number(this.value);save()">원</label><br>
+   <label class="chk"><input type="checkbox" ${s.allowAdmin?"checked":""} onchange="state.settings.allowAdmin=this.checked;save()"> 교감·교장(관리자)도 후보에 포함 (기준표 비고: 필요한 경우)</label><br>
+   <label class="chk"><input type="checkbox" ${s.lunchSupervisor?"checked":""} onchange="state.settings.lunchSupervisor=this.checked;save()"> 담임 결강 시 점심시간 급식지도 담당도 추천 (규정 5-다)</label>
+   <h3>가중치</h3>
+   <p class="tiny muted">필요한 기준만 남겨 사용할 수 있습니다. 삭제한 기준은 보결 추천 점수에 반영되지 않습니다. 삭제한 기준은 아래에서 다시 추가할 수 있습니다.</p>
+   <table class="small"><tr><th>항목</th><th class="r">가중치</th><th></th></tr>
+   ${state.settings.weightItems.map((x,i)=>`<tr><td><input style="width:260px" value="${esc(x.label)}" onchange="setWeightLabel(${i},this.value)"></td><td class="r"><input type="number" class="num" value="${x.value}" onchange="setWeightValue(${i},this.value)"></td><td><button class="danger sm" onclick="removeWeight(${i})">삭제</button></td></tr>`).join("")}
+   </table>
+   <div class="row"><select id="weightAddSel">${WEIGHT_DEFS.filter(d=>!state.settings.weightItems.some(x=>x.key===d.key)).map(d=>`<option value="${d.key}">${esc(d.label)}</option>`).join("")}</select><button onclick="addWeight()" ${state.settings.weightItems.length>=WEIGHT_DEFS.length?"disabled":""}>+ 항목 추가</button></div>
+  </div>
+  <div><h3>시정표</h3>
+   <table class="small"><tr><th>블록</th><th>시작</th><th>종료</th><th>1·2·6학년</th><th>3·4·5학년</th></tr>
+   ${tt.blocks.map((b,bi)=>`<tr><td>${b.id}</td><td><input class="tm" value="${b.start}" onchange="state.tt.blocks[${bi}].start=this.value;save()"></td><td><input class="tm" value="${b.end}" onchange="state.tt.blocks[${bi}].end=this.value;save()"></td><td>${(p=>p===null?"점심":p+"교시")(blockIdxToPeriod(tt,1,bi))}</td><td>${(p=>p===null?"점심":p+"교시")(blockIdxToPeriod(tt,3,bi))}</td></tr>`).join("")}</table>
+   <label>점심이 12:20인 학년(그룹1) <input value="${tt.group1Grades.join(",")}" onchange="state.tt.group1Grades=this.value.split(',').map(Number).filter(Boolean);save();render()"></label>
+   <h3>학년별 요일 교시 수</h3>
+   <table class="small"><tr><th>학년</th>${DAYS.map(d=>`<th>${d}</th>`).join("")}</tr>
+   ${[1,2,3,4,5,6].map(g=>`<tr><td>${g}</td>${DAYS.map((d,i)=>`<td><input type="number" class="num" value="${tt.maxPeriods[g][i]}" onchange="state.tt.maxPeriods[${g}][${i}]=Number(this.value);save()"></td>`).join("")}</tr>`).join("")}</table>
+   <h3>백업</h3>
+   <button onclick="backup()">전체 백업 내려받기(.json)</button> <label class="btn">백업 복원 <input type="file" accept=".json" style="display:none" onchange="restore(this.files[0])"></label>
+   <p class="tiny muted">데이터는 Firebase 데이터베이스에 자동 저장됩니다. PC 교체·학기 말 백업용으로 내려받아 두실 수 있습니다.</p>
+   <button class="danger" onclick="resetAll()">초기화(내장 시간표로 되돌리기)</button>
+  </div></div>`;
+}
+function setWeightValue(i,v){
+  ensureWeightItems();
+  const x=state.settings.weightItems[i]; if(!x) return;
+  x.value=Number(v)||0; state.settings.w[x.key]=x.value; save();
+}
+function setWeightLabel(i,v){
+  ensureWeightItems();
+  const x=state.settings.weightItems[i]; if(!x) return;
+  x.label=(v||"").trim()||WEIGHT_DEFS.find(d=>d.key===x.key).label; save(); render();
+}
+function addWeight(){
+  ensureWeightItems();
+  const sel=document.getElementById("weightAddSel"); const key=sel&&sel.value;
+  const d=WEIGHT_DEFS.find(x=>x.key===key);
+  if(!d) return;
+  if(state.settings.weightItems.some(x=>x.key===key)) return;
+  const value=Number(DEFAULT_SETTINGS.w[key]??0);
+  state.settings.weightItems.push({key,label:d.label,value});
+  state.settings.w[key]=value; save(); render();
+}
+function removeWeight(i){
+  ensureWeightItems();
+  const x=state.settings.weightItems[i]; if(!x) return;
+  if(!confirm("\""+x.label+"\" 기준을 삭제할까요? 삭제하면 보결 추천 점수에 이 기준이 반영되지 않습니다.")) return;
+  state.settings.weightItems.splice(i,1);
+  delete state.settings.w[x.key];
+  save(); render();
+}
+
+function backup(){ const c=Object.assign({},state); delete c._act; dl(new Blob([JSON.stringify(c,null,1)],{type:"application/json"}), "보결앱_백업_"+todayStr()+".json"); }
+function restore(f){ if(!f) return; const rd=new FileReader(); rd.onload=e=>{ try{ const s=JSON.parse(e.target.result); if(!s.teachers||!s.lessons) throw new Error("형식 오류"); state=s; ensureWeightItems(); save(); alert("복원했습니다."); showTab("dash"); }catch(err){ alert("복원 실패: "+err.message); } }; rd.readAsText(f); }
+function resetAll(){ if(!confirm("모든 이력·설정이 초기화되고 서버 데이터가 내장 시간표로 돌아갑니다. 계속할까요?")) return; loadLocalDefault(); save(); showTab("dash"); }
+
+// ---- 앱 초기화 ----
+window.addEventListener("DOMContentLoaded", ()=>{
+  loadLocalDefault();
+  initRealtimeSync();
+  const nav=document.getElementById("nav");
+  nav.innerHTML=TABS.map(([id,l])=>`<button class="tab ${id===cur?"on":""}" data-t="${id}" onclick="showTab('${id}')">${l}</button>`).join("");
+  render();
+});
+</script>
+</body></html>
